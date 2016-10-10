@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>../icon/zoomin.png</file>
+        <file>../icon/zoomout.png</file>
+        <file>畢業證書-碩士.jpg</file>
+    </qresource>
+</RCC>
