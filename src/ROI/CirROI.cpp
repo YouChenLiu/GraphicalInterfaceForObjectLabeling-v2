@@ -1,33 +1,21 @@
 #include "CirROI.h"
 
-#include <opencv2/imgproc.hpp>
+#include <QPainter>
 
 CirROI::CirROI(unsigned int sn, int x, int y, int radius) : EllipROI(sn, x, y, radius, radius, Shapes::CIRCLE)
 {
-
+  clearState();
 }
 
-void CirROI::draw(cv::Mat &image) const
+bool CirROI::contains(const QPoint& pt) const
 {
-  ROIBase::draw(image);
-  cv::circle(image, getStart(), getRadius(), cv::Scalar::all(255));
-}
+  bool result = false;
 
-bool CirROI::checkAmbit(int x, int y) const
-{
-  bool bInside = false;
-  auto center = getStart();
-  auto radius = getRadius();
-  int iDiffX = x - center.x;
-  int iDiffY = y - center.y;
-  int iValue = iDiffX * iDiffX + iDiffY * iDiffY;
-  if (iValue <= radius * radius) {
-    bInside = true;
-  }
-  return bInside;
-}
+  auto diff = center() - pt;
+  auto diffX = diff.x();
+  auto diffY = diff.y();
+  auto distance = static_cast<int>(sqrt(diffX * diffX + diffY * diffY));
 
-bool CirROI::hitModifyingPos(int x, int y)
-{
-  return false;
+  result = distance <= radius() ? true : false;
+  return result;
 }

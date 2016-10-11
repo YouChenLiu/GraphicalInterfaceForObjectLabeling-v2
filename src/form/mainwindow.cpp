@@ -3,10 +3,12 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QPixmap>
-#include <opencv2/highgui.hpp>
-#include "ROI/RectROI.h"
-#include "ROIManager/ROIManager.h"
 #include <QPainter>
+#include <QTableWidgetItem>
+
+#include "ROI/ROIBase.h"
+#include "ROIManager/ROIManager.h"
+
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow)
@@ -15,6 +17,13 @@ MainWindow::MainWindow(QWidget *parent) :
   m_Shape = Shapes::RECTANGLE;
   ui->viewer->setShape(m_Shape);
   ui->viewer->setDrawPreview(true);
+  connect(ui->cbShowRect, SIGNAL(clicked(bool)), this, SLOT(drawROIs()));
+  connect(ui->cbShowEllipse, SIGNAL(clicked(bool)), this, SLOT(drawROIs()));
+  connect(ui->cbShowCircle, SIGNAL(clicked(bool)), this, SLOT(drawROIs()));
+  connect(ui->radioRect, SIGNAL(clicked(bool)), this, SLOT(onShapeChanged(bool)));
+  connect(ui->radioEllipse, SIGNAL(clicked(bool)), this, SLOT(onShapeChanged(bool)));
+  connect(ui->radioCircle, SIGNAL(clicked(bool)), this, SLOT(onShapeChanged(bool)));
+  connect(&m_ROIManager, SIGNAL(countChanged(const QList<QSharedPointer<ROIBase>>&)), this, SLOT(updateTable(const QList<QSharedPointer<ROIBase>>&)));
 }
 
 MainWindow::~MainWindow()
@@ -46,22 +55,26 @@ void MainWindow::on_viewer_clicked(int x, int y)
   auto list = m_ROIManager.hit(x, y);
   if (list.isEmpty()) {
     ui->viewer->setDrawPreview(true);
-    return;
+  } else {
+    ui->viewer->setDrawPreview(false);
+    for (const auto& roi : list) {
+      ui->viewer->addModifyingROI(roi->sn(), roi->rect(), roi->shape());
+    }
   }
-
-  ui->viewer->setDrawPreview(false);
-  for (const auto& roi : list) {
-    ui->viewer->addModifyingROI(roi->getSN(), roi->getQRect(), roi->getShape());
-  }
-
   drawROIs();
 }
 
-void MainWindow::on_viewer_newROI(const QPoint& ptLT, const QPoint& ptRB)
+void MainWindow::on_viewer_newROI(const QRect& rect)
 {
   switch (m_Shape) {
   case Shapes::RECTANGLE:
-    m_ROIManager.addRectROI(ptLT, ptRB);
+    m_ROIManager.addRectROI(rect.x(), rect.y(), rect.width(), rect.height());
+    break;
+  case Shapes::ELLIPSE:
+    m_ROIManager.addEllipROI(rect.x(), rect.y(), rect.width(), rect.height());
+    break;
+  case Shapes::CIRCLE:
+    m_ROIManager.addCirROI(rect.x(), rect.y(), rect.width() < rect.height() ? rect.width() : rect.height());
     break;
   default:
     break;
@@ -76,25 +89,60 @@ void MainWindow::on_viewer_adjustROI(unsigned int sn, const QRect& rect)
   if (roi.isNull()) {
     return;
   }
-  roi->setRegion(rect);
+  roi->setRect(rect);
+}
+
+void MainWindow::onShapeChanged(bool)
+{
+  if (ui->radioRect->isChecked()) {
+    m_Shape = Shapes::RECTANGLE;
+  } else if (ui->radioEllipse->isChecked()) {
+    m_Shape = Shapes::ELLIPSE;
+  } else {
+    m_Shape = Shapes::CIRCLE;
+  }
+  ui->viewer->setShape(m_Shape);
+}
+
+void MainWindow::updateTable(const QList<QSharedPointer<ROIBase>>& listpROIs)
+{
+  drawROIs();
+
+  ui->ROIList->clearContents();
+
+  if (listpROIs.count() == 0) {
+    return;
+  }
+
+  ui->ROIList->setRowCount(listpROIs.count());
+
+  int row = 0;
+  for (const auto& roi : listpROIs) {
+    ui->ROIList->setItem(row, 0, new QTableWidgetItem(QString::number(roi->sn())));
+    ui->ROIList->setItem(row, 1, new QTableWidgetItem(QString::number(roi->x())));
+    ui->ROIList->setItem(row, 2, new QTableWidgetItem(QString::number(roi->y())));
+    ui->ROIList->setItem(row, 3, new QTableWidgetItem(QString::number(roi->width())));
+    ui->ROIList->setItem(row, 4, new QTableWidgetItem(QString::number(roi->height())));
+    ui->ROIList->setItem(row, 5, new QTableWidgetItem(roi->getShapeString()));
+    ++row;
+  }
 }
 
 void MainWindow::drawROIs() const
 {
-  const auto& rois = m_ROIManager.getROIs();
   QPixmap pixmap(640, 480);
   QPainter painter(&pixmap);
+  m_ROIManager.drawROIs(painter, 1.0, ui->cbShowRect->isChecked(), ui->cbShowEllipse->isChecked(), ui->cbShowCircle->isChecked());
+  ui->viewer->setPixmap(pixmap);
+}
+
+void MainWindow::on_btnDelete_clicked()
+{
+  const auto rois = m_ROIManager.getROIs();
   for (const auto& roi : rois) {
-    if (!roi->getVisable()) {
-      continue;
-    }
-    switch (roi->getShape()) {
-    case Shapes::RECTANGLE:
-      painter.drawRect(roi->getQRect());
-      break;
-    default:
-      break;
+    if (roi->selected()) {
+      ui->viewer->removeModifyingROI(roi->sn());
+      m_ROIManager.removeROI(roi->sn());
     }
   }
-  ui->viewer->setPixmap(pixmap);
 }

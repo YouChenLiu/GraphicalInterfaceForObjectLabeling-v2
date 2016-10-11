@@ -2,8 +2,6 @@
 
 #include <QMouseEvent>
 #include <QPainter>
-#include <QCursor>
-#include <QSet>
 
 Viewer::Viewer(QWidget* parent, Qt::WindowFlags flag) : QLabel(parent, flag)
 {
@@ -22,9 +20,23 @@ Viewer::~Viewer()
 
 }
 
+void Viewer::removeModifyingROI(unsigned int sn)
+{
+ for (const auto& roi : m_listMROI) {
+   if (roi.SN == sn) {
+     m_listMROI.removeOne(roi);
+   }
+ }
+
+ if (m_listMROI.count() == 0) {
+   m_bDrawPreview = true;
+ }
+}
+
 void Viewer::mouseMoveEvent(QMouseEvent* e)
 {
   m_MouseState.ptCurrent = e->pos();
+  this->setCursor(Qt::ArrowCursor);
 
   for (auto& m : m_listMROI) {
     if (m.modifyingRect.contains(m_MouseState.ptCurrent)) {
@@ -35,8 +47,6 @@ void Viewer::mouseMoveEvent(QMouseEvent* e)
       this->setCursor(Qt::SizeAllCursor);
       break;
     }
-
-    this->setCursor(Qt::ArrowCursor);
   }
 
   if (!m_MouseState.bLeftPressed) {
@@ -45,8 +55,15 @@ void Viewer::mouseMoveEvent(QMouseEvent* e)
 
   for (auto& m : m_listMROI) {
     if (m.bResizing == true) {
+      if (m.shape == Shapes::CIRCLE) {
+        QPoint diff = m_MouseState.ptCurrent - m.rect.topLeft();
+        int diameter = diff.x() < diff.y() ? diff.x() : diff.y();
+        QPoint ptRB = QPoint(m.rect.x() + diameter, m.rect.y() + diameter);
+        m.resize(ptRB);
+      } else {
         m.resize(m_MouseState.ptCurrent);
-        break;
+      }
+      break;
     }
     if (m.bMoving) {
       m.move(m_MouseState.ptCurrent - m_MouseState.ptLeftPressed);
@@ -59,6 +76,7 @@ void Viewer::mouseMoveEvent(QMouseEvent* e)
 
 void Viewer::mousePressEvent(QMouseEvent* e)
 {
+  m_MouseState.ptCurrent = e->pos();
   switch (e->button()) {
   case Qt::LeftButton:
     m_MouseState.ptLeftPressed = e->pos();
@@ -71,9 +89,7 @@ void Viewer::mousePressEvent(QMouseEvent* e)
     break;
   }
 
-  QSet<int> removedIdxes;
-  for (int i = 0; i < m_listMROI.count(); ++i) {
-    auto& m = m_listMROI[i];
+  for (auto& m : m_listMROI) {
     if (m.modifyingRect.contains(m_MouseState.ptCurrent)) {
       m.bResizing = true;
       break;
@@ -82,16 +98,13 @@ void Viewer::mousePressEvent(QMouseEvent* e)
       m.bMoving = true;
       break;
     }
-    removedIdxes.insert(i);
-  }
-
-  for (const auto idx : removedIdxes) {
-    m_listMROI.removeAt(idx);
+    m_listMROI.removeOne(m);
   }
 }
 
 void Viewer::mouseReleaseEvent(QMouseEvent* e)
 {
+  m_MouseState.ptCurrent = e->pos();
   switch (e->button()) {
   case Qt::LeftButton:
     m_MouseState.ptLeftRelease = e->pos();
@@ -119,11 +132,13 @@ void Viewer::mouseReleaseEvent(QMouseEvent* e)
 
   if (m_MouseState.ptCurrent == m_MouseState.ptLeftPressed) {
     emit clicked(m_MouseState.ptCurrent.x(), m_MouseState.ptCurrent.y());
-  }
-  if (m_bDrawPreview) {
+  } else {
+    if (!m_bDrawPreview) {
+      return;
+    }
     QPoint ptLT = getLeftTop(m_MouseState.ptCurrent, m_MouseState.ptLeftPressed);
     QPoint ptRB = getRightBottom(m_MouseState.ptCurrent, m_MouseState.ptLeftPressed);
-    emit newROI(ptLT, ptRB);
+    emit newROI(QRect(ptLT, ptRB));
   }
 
   init();
@@ -143,30 +158,34 @@ void Viewer::paintEvent(QPaintEvent* e)
     painter.setPen(Qt::SolidLine);
     painter.setBrush(Qt::SolidPattern);
     painter.drawRect(m.modifyingRect);
+
+    if (m.shape != Shapes::RECTANGLE) {
+      painter.setBrush(Qt::NoBrush);
+      painter.drawEllipse(m.rect);
+    }
   }
 
 
-  if (m_bDrawPreview && m_listMROI.isEmpty() && m_MouseState.ptLeftPressed != QPoint(-1, -1)) {
+  if (m_bDrawPreview && m_listMROI.isEmpty() && m_MouseState.ptLeftPressed != m_MouseState.ptLeftRelease) {
     painter.setBrush(Qt::NoBrush);
     painter.setPen(Qt::SolidLine);
     QPoint ptLT = getLeftTop(m_MouseState.ptCurrent, m_MouseState.ptLeftPressed);
     QPoint ptRB = getRightBottom(m_MouseState.ptCurrent, m_MouseState.ptLeftPressed);
-    QPoint ptCenter = QPoint((ptLT.x() + ptRB.x() / 2),
-                             (ptLT.y() + ptRB.y() / 2));
-    int iWidth = ptRB.x() - ptLT.x();
-    int iHeight = ptRB.y() - ptLT.y();
-    int iRadius = 0;
+    QRect rect = QRect(ptLT, ptRB);
+    int iDiameter = 0;
 
     switch (m_Shape) {
       case Shapes::RECTANGLE:
-      painter.drawRect(ptLT.x(), ptLT.y(), iWidth, iHeight);
+      painter.drawRect(rect);
       break;
     case Shapes::ELLIPSE:
-      painter.drawEllipse(ptCenter, iWidth / 2, iHeight / 2);
+      painter.drawEllipse(rect);
       break;
     case Shapes::CIRCLE:
-      iRadius = static_cast<int>(sqrt(iWidth * iWidth + iHeight * iHeight) / 2);
-      painter.drawEllipse(ptCenter, iRadius, iRadius);
+      iDiameter = rect.width() < rect.height() ? rect.width() : rect.height();
+      rect.setWidth(iDiameter);
+      rect.setHeight(iDiameter);
+      painter.drawEllipse(rect);
       break;
     default:
       break;

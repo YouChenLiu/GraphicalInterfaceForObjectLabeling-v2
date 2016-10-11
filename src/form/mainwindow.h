@@ -28,9 +28,17 @@ private slots:
 
   void on_viewer_clicked(int x, int y);
 
-  void on_viewer_newROI(const QPoint& ptLT, const QPoint& ptRB);
+  void on_viewer_newROI(const QRect& rect);
 
   void on_viewer_adjustROI(unsigned int sn, const QRect& rect);
+
+  void onShapeChanged(bool);
+
+  void updateTable(const QList<QSharedPointer<ROIBase>>& listpROIs);
+
+  void on_btnDelete_clicked();
+
+  void drawROIs(void) const;
 
 private:
   Ui::MainWindow *ui;
@@ -39,7 +47,7 @@ private:
   Shapes m_Shape;
 
 private:
-  void drawROIs(void) const;
+
 };
 
 #endif // MAINWINDOW_H

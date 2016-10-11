@@ -6,6 +6,8 @@
 class RectROI : public ROIBase
 {
 public:
+  explicit RectROI(unsigned int sn, const QPoint& ptTopLeft, const QPoint& ptBottomRight, Shapes shape = Shapes::RECTANGLE);
+  explicit RectROI(unsigned int sn, const QPoint& ptTopLeft, const QSize& Size, Shapes shape = Shapes::RECTANGLE);
   explicit RectROI(unsigned int sn, int x, int y, int width, int height, Shapes shape = Shapes::RECTANGLE);
 
   virtual const QString getShapeString(void) const
@@ -13,11 +15,7 @@ public:
     return QString("rectangle");
   }
 
-  virtual bool checkAmbit(int x, int y) const final;
-
-  virtual bool hitModifyingPos (int x, int y) final;
-
-  virtual void draw(cv::Mat& image) const final;
+  virtual void draw(QPainter& painter) const final;
 };
 
 #endif // RECTROI_H

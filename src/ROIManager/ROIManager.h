@@ -4,11 +4,9 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QList>
-#include <QPoint>
-#include "ROI/ROIBase.h"
-#include "ROI/RectROI.h"
-#include "ROI/EllipROI.h"
-#include "ROI/CirROI.h"
+
+class ROIBase;
+class QPainter;
 
 class ROIManager : public QObject
 {
@@ -32,35 +30,23 @@ public:
 
   QSharedPointer<ROIBase>& getROI(unsigned int sn);
 
-  void addRectROI(int x, int y, int width, int height)
-  {
-    m_listROI.append(QSharedPointer<RectROI>::create(m_iSNGen++, x, y, width, height));
-  }
+  void addRectROI(int x, int y, int width, int height);
 
-  void addRectROI(const cv::Point2i& ptLT, const cv::Point2i& ptRB);
+  void addEllipROI(int x, int y, int major, int minor);
 
-  void addRectROI(const QPoint& ptLT, const QPoint& ptRB)
-  {
-    addRectROI(cv::Point2i(ptLT.x(), ptLT.y()), cv::Point2i(ptRB.x(), ptRB.y()));
-  }
+  void addCirROI(int x, int y, int radius);
 
-  void addEllipROI(int x, int y, int major, int minor)
-  {
-    m_listROI.append(QSharedPointer<EllipROI>::create(m_iSNGen++, x, y, major, minor));
-  }
+  void removeROI(unsigned int sn);
 
-  void addCirROI(int x, int y, int radius)
-  {
-    m_listROI.append(QSharedPointer<CirROI>::create(m_iSNGen++, x, y, radius));
-  }
-
-  void drawROIs(cv::Mat& image);
+  void drawROIs(QPainter& painter, double scale = 1.0, bool bRect = true, bool bEllip = true, bool bCir = true) const;
 
   void reset(void);
 
+signals:
+  void countChanged(const QList<QSharedPointer<ROIBase>>& listpROIs);
+
 private:
   void clearROIState(void);
-
 };
 
 #endif // ROIMANAGER_H

@@ -83,24 +83,24 @@ void ResultManager::addROIs(int iFrameNum, const QList<QSharedPointer<ROIBase>>&
     RecordElement.appendChild(ShapeElement);
 
     // start point
-    auto pt = roi->getStart();
-    auto SPText = result.createTextNode(QString("%1, %2").arg(pt.x).arg(pt.y));
+    auto pt = roi->topLeft();
+    auto SPText = result.createTextNode(QString("%1, %2").arg(pt.x()).arg(pt.y()));
     auto SPElement = result.createElement(XMLLabel::tagStartPoint);
     SPElement.appendChild(SPText);
     RecordElement.appendChild(SPElement);
 
     // width
-    auto WidthText = result.createTextNode(QString::number(roi->getWidth()));
-    auto WidthElement = result.createElement(XMLLabel::tagWidth);
-    WidthElement.appendChild(WidthText);
-    RecordElement.appendChild(WidthElement);
+    auto widthText = result.createTextNode(QString::number(roi->width()));
+    auto widthElement = result.createElement(XMLLabel::tagWidth);
+    widthElement.appendChild(widthText);
+    RecordElement.appendChild(widthElement);
 
     // height
-    auto height = roi->getHeight();
-    auto HeightText = result.createTextNode(QString::number(height));
-    auto HeightElement = result.createElement(XMLLabel::tagHeight);
-    HeightElement.appendChild(HeightText);
-    RecordElement.appendChild(HeightElement);
+    auto height = roi->height();
+    auto heightText = result.createTextNode(QString::number(height));
+    auto heightElement = result.createElement(XMLLabel::tagHeight);
+    heightElement.appendChild(heightText);
+    RecordElement.appendChild(heightElement);
 
     frameTag.appendChild(RecordElement);
   }

@@ -4,8 +4,6 @@
 #include <QMap>
 #include <QString>
 
-#include <opencv2/core.hpp>
-
 constexpr int DEFAULT_WIDTH = 640;
 constexpr int DEFAULT_HEIGHT = 480;
 

@@ -3,9 +3,11 @@
 
 #include "common.h"
 
-class QRect;
+#include <QRect>
+class QPoint;
+class QPainter;
 
-class ROIBase
+class ROIBase : protected QRect
 {
 protected:
   static const unsigned int GLOBAL_STATE_POS = 24;
@@ -13,8 +15,6 @@ protected:
   static const unsigned int SELECTED = 0x80 << GLOBAL_STATE_POS;
   static const unsigned int INVISABLE = 0x40 << GLOBAL_STATE_POS;
 private:
-  cv::Point2i m_ptStart;
-  cv::Size2i m_Size;
   Shapes m_Shape;
   unsigned int m_iSN;
 
@@ -31,34 +31,81 @@ private:
   unsigned int m_iState;
 
 public:
+  explicit ROIBase(unsigned int sn, const QPoint& ptTopLeft, const QPoint& ptBottomRight, Shapes shape = Shapes::UNDEFINE);
+  explicit ROIBase(unsigned int sn, const QPoint& ptTopLeft, const QSize& Size, Shapes shape = Shapes::UNDEFINE);
   explicit ROIBase(unsigned int sn, int x, int y, int width, int height, Shapes shape = Shapes::UNDEFINE);
 
-  auto getSN(void) const
+  auto sn(void) const
   {
     return m_iSN;
   }
 
-  auto getStart(void) const
+  auto x(void) const
   {
-    return m_ptStart;
+    return QRect::x();
   }
 
-  auto getSize(void) const
+  auto y(void) const
   {
-    return m_Size;
+    return QRect::y();
   }
 
-  auto getWidth(void) const
+  auto topLeft(void) const
   {
-    return getSize().width;
+    return QRect::topLeft();
   }
 
-  auto getHeight(void) const
+  void setTopLeft(const QPoint& pt)
   {
-    return getSize().height;
+    QRect::setTopLeft(pt);
   }
 
-  auto getShape(void) const
+  auto bottomRight(void) const
+  {
+    return QRect::bottomRight();
+  }
+
+  void setBottomRight(const QPoint& pt)
+  {
+    QRect::setBottomRight(pt);
+  }
+
+  auto center(void) const
+  {
+    return QRect::center();
+  }
+
+  auto size(void) const
+  {
+    return QRect::size();
+  }
+
+  void setSize(const QSize& size)
+  {
+    QRect::setSize(size);
+  }
+
+  auto width(void) const
+  {
+    return QRect::width();
+  }
+
+  void setWidth(int width)
+  {
+    QRect::setWidth(width);
+  }
+
+  auto height(void) const
+  {
+    return QRect::height();
+  }
+
+  void setHeight(int height)
+  {
+    QRect::setHeight(height);
+  }
+
+  auto shape(void) const
   {
     return m_Shape;
   }
@@ -67,11 +114,17 @@ public:
     return QString("unknow");
   }
 
-  virtual bool checkAmbit(int x, int y) const = 0;
+  virtual bool contains(const QPoint& pt) const
+  {
+    return QRect::contains(pt, false);
+  }
 
-  virtual bool hitModifyingPos (int x, int y) = 0;
+  bool contains(int x, int y) const
+  {
+    return contains(QPoint(x, y));
+  }
 
-  virtual void draw(cv::Mat& image) const;
+  virtual void draw(QPainter& painter) const = 0;
 
   void clearState(void)
   {
@@ -80,43 +133,34 @@ public:
 
   void setSelected(bool value);
 
-  bool getSelected(void) const
+  bool selected(void) const
   {
     return (m_iState & SELECTED) ? true : false;
   }
 
   void setVisable(bool value);
 
-  auto getVisable(void) const
+  auto visable(void) const
   {
     return (m_iState & INVISABLE) ? false : true;
   }
 
-  virtual void setStart(int x, int y)
+  auto rect(void) const
   {
-    m_ptStart = cv::Point2i(x, y);
+    return QRect(topLeft(), bottomRight());
   }
 
-  virtual void setSize(int width, int height)
+  virtual void setRect(const QRect& rect)
   {
-    m_Size = cv::Size2i(width, height);
+    QRect::setRect(rect.x(), rect.y(), rect.width(), rect.height());
   }
 
-  virtual void setRegion(const QRect& rect);
-
-  virtual QRect getQRect(void) const;
+  bool operator==(const ROIBase& rhs)
+  {
+    return this->sn() == rhs.sn();
+  }
 
 protected:
-  virtual void move(int x, int y);
-
-  virtual void adjustWidth(int value) {
-    m_Size.width += value;
-  }
-
-  virtual void adjustHeight(int value) {
-    m_Size.height += value;
-  }
-
 
 };
 

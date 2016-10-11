@@ -5,8 +5,6 @@
 #include <QList>
 #include "common.h"
 
-class QPoint;
-
 class Viewer : public QLabel
 {
   Q_OBJECT
@@ -59,6 +57,11 @@ private:
       originalCenter = rect.center();
       modifyingRect.moveCenter(rect.bottomRight());
     }
+
+    bool operator==(const ModifyingROI& rhs)
+    {
+      return this->SN == rhs.SN;
+    }
   };
 
   struct MouseState
@@ -100,6 +103,8 @@ public:
     m_listMROI.append(ModifyingROI(sn, rect, shape));
   }
 
+  void removeModifyingROI(unsigned int sn);
+
 protected:
   void mouseMoveEvent(QMouseEvent* e);
   void mousePressEvent(QMouseEvent* e);
@@ -113,7 +118,7 @@ private:
 
 signals:
 
-  void newROI(const QPoint& ptLT, const QPoint& ptRB);
+  void newROI(const QRect& rect);
 
   void clicked(int x, int y);
 

@@ -1,8 +1,13 @@
 #include "ROIManager.h"
 #include <QRect>
+#include "ROI/ROIBase.h"
+#include "ROI/RectROI.h"
+#include "ROI/EllipROI.h"
+#include "ROI/CirROI.h"
 
 ROIManager::ROIManager(QObject* parent) : QObject(parent)
 {
+  reset();
   m_listROI.reserve(20);
 }
 
@@ -14,7 +19,7 @@ QList<QSharedPointer<ROIBase>> ROIManager::hit(int x, int y)
 {
   QList<QSharedPointer<ROIBase>> list;
   for (auto& roi : m_listROI) {
-    if (roi->checkAmbit(x, y)) {
+    if (roi->contains(x, y)) {
       roi->setSelected(true);
       list.append(roi);
     } else {
@@ -27,7 +32,7 @@ QList<QSharedPointer<ROIBase>> ROIManager::hit(int x, int y)
 QSharedPointer<ROIBase>& ROIManager::getROI(unsigned int sn)
 {
   for (auto& roi : m_listROI) {
-    if (roi->getSN() == sn) {
+    if (roi->sn() == sn) {
       return roi;
       break;
     }
@@ -36,19 +41,48 @@ QSharedPointer<ROIBase>& ROIManager::getROI(unsigned int sn)
   return QSharedPointer<ROIBase>();
 }
 
-void ROIManager::addRectROI(const cv::Point2i& ptLT, const cv::Point2i& ptRB)
+void ROIManager::addRectROI(int x, int y, int width, int height)
 {
-  int x = ptLT.x;
-  int y = ptLT.y;
-  int width = ptRB.x - ptLT.x;
-  int height = ptRB.y - ptLT.y;
-  addRectROI(x, y, width, height);
+  m_listROI.append(QSharedPointer<RectROI>::create(m_iSNGen++, x, y, width, height));
+  emit countChanged(m_listROI);
 }
 
-void ROIManager::drawROIs(cv::Mat &image)
+void ROIManager::addEllipROI(int x, int y, int major, int minor)
 {
-  for (auto roi : m_listROI) {
-    roi->draw(image);
+  m_listROI.append(QSharedPointer<EllipROI>::create(m_iSNGen++, x, y, major, minor));
+  emit countChanged(m_listROI);
+}
+
+void ROIManager::addCirROI(int x, int y, int radius)
+{
+  m_listROI.append(QSharedPointer<CirROI>::create(m_iSNGen++, x, y, radius));
+  emit countChanged(m_listROI);
+}
+
+void ROIManager::removeROI(unsigned int sn)
+{
+  for (const auto& roi : m_listROI) {
+    if (roi->sn() == sn) {
+      m_listROI.removeOne(roi);
+      emit countChanged(m_listROI);
+      break;
+    }
+  }
+}
+
+void ROIManager::drawROIs(QPainter& painter, double scale, bool bRect, bool bEllip, bool bCir) const
+{
+  for (const auto& roi : m_listROI) {
+    if (!roi->visable()) {
+      continue;
+    }
+    if (roi->shape() == Shapes::UNDEFINE ||
+        !bRect && roi->shape() == Shapes::RECTANGLE ||
+        !bEllip && roi->shape() == Shapes::ELLIPSE ||
+        !bCir && roi->shape() == Shapes::CIRCLE) {
+      continue;
+    }
+    roi->draw(painter);
   }
 }
 
@@ -56,6 +90,7 @@ void ROIManager::reset()
 {
   m_iSNGen = 0;
   m_listROI.clear();
+  emit countChanged(m_listROI);
 }
 
 void ROIManager::clearROIState(void)

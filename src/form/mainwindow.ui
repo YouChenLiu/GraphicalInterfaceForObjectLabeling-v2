@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>960</width>
-    <height>592</height>
+    <height>703</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
      <string>Information</string>
     </property>
    </widget>
-   <widget class="QTableWidget" name="tableWidget">
+   <widget class="QTableWidget" name="ROIList">
     <property name="geometry">
      <rect>
       <x>670</x>
@@ -36,6 +36,36 @@
       <height>301</height>
      </rect>
     </property>
+    <column>
+     <property name="text">
+      <string>SN</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>X</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Y</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Width</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Height</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Shape</string>
+     </property>
+    </column>
    </widget>
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
@@ -359,6 +389,68 @@
     </property>
     <property name="scaledContents">
      <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_4">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>539</y>
+      <width>101</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Shape</string>
+    </property>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>85</width>
+       <height>62</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QRadioButton" name="radioRect">
+        <property name="text">
+         <string>Rectangle</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioEllipse">
+        <property name="text">
+         <string>Ellipse</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioCircle">
+        <property name="text">
+         <string>Circle</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QPushButton" name="btnDelete">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>570</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Delete</string>
     </property>
    </widget>
   </widget>

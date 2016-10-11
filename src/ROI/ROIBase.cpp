@@ -1,26 +1,23 @@
 #include "ROIBase.h"
 #include <QPoint>
-#include <QRect>
+#include <QPainter>
 
-ROIBase::ROIBase(unsigned int sn, int x, int y, int width, int height, Shapes shape)
+ROIBase::ROIBase(unsigned int sn, const QPoint& ptTopLeft, const QPoint& ptBottomRight, Shapes shape) : QRect(ptTopLeft, ptBottomRight)
 {
   m_iSN = sn;
-  m_ptStart = cv::Point2i(x, y);
-  m_Size = cv::Size2i(width, height);
   m_Shape = shape;
 }
 
-void ROIBase::draw(cv::Mat& image) const
+ROIBase::ROIBase(unsigned int sn, const QPoint& ptTopLeft, const QSize& Size, Shapes shape) : QRect(ptTopLeft, Size)
 {
-  if (getVisable() == false) {
-    return;
-  }
+  m_iSN = sn;
+  m_Shape = shape;
 }
 
-void ROIBase::move(int x, int y)
+ROIBase::ROIBase(unsigned int sn, int x, int y, int width, int height, Shapes shape) : QRect(x, y, width, height)
 {
-  m_ptStart.x += x;
-  m_ptStart.y += y;
+  m_iSN = sn;
+  m_Shape = shape;
 }
 
 void ROIBase::setSelected(bool value)
@@ -41,17 +38,4 @@ void ROIBase::setVisable(bool value)
   } else {
     m_iState |= INVISABLE;
   }
-}
-
-void ROIBase::setRegion(const QRect& rect)
-{
-  setStart(rect.topLeft().x(), rect.topLeft().y());
-  setSize(rect.width(), rect.height());
-}
-
-QRect ROIBase::getQRect() const
-{
-  QPoint ptLT = QPoint(getStart().x, getStart().y);
-  QSize size = QSize(getWidth(), getHeight());
-  return QRect(ptLT, size);
 }

@@ -6,19 +6,27 @@
 class EllipROI : public ROIBase
 {
 public:
-  EllipROI(unsigned int sn, int x, int y, int major, int minor, Shapes shape = Shapes::ELLIPSE);
+  EllipROI(unsigned int sn, int x, int y, int width, int height, Shapes shape = Shapes::ELLIPSE);
 
 public:
+  auto major(void) const
+  {
+    return width() / 2;
+  }
+
+  auto minor(void) const
+  {
+    return height() / 2;
+  }
+
   virtual const QString getShapeString(void) const
   {
     return QString("ellipse");
   }
 
-  virtual bool checkAmbit(int x, int y) const;
+  virtual bool contains(const QPoint& pt) const;
 
-  virtual bool hitModifyingPos (int x, int y);
-
-  virtual void draw(cv::Mat& image) const;
+  virtual void draw(QPainter& painter) const;
 };
 
 #endif // ELLIPROI_H

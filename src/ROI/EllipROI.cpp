@@ -1,35 +1,28 @@
 #include "EllipROI.h"
 
-#include <opencv2/imgproc.hpp>
+#include <QPainter>
 
-EllipROI::EllipROI(unsigned int sn, int x, int y, int major, int minor, Shapes shape) : ROIBase(sn, x, y, major, minor, shape)
+EllipROI::EllipROI(unsigned int sn, int x, int y, int width, int height, Shapes shape) : ROIBase(sn, x, y, width, height, shape)
 {
-
+  clearState();
 }
 
-void EllipROI::draw(cv::Mat &image) const
-{
-  ROIBase::draw(image);
-  cv::ellipse(image, getStart(), getSize(), 0, 0, 360, cv::Scalar::all(255));
-}
-
-bool EllipROI::checkAmbit(int x, int y) const
+bool EllipROI::contains(const QPoint& pt) const
 {
   bool bInside = false;
-  auto center = getStart();
-  double dDiffX = qAbs(center.x - x);
-  double dDiffY = qAbs(center.y - y);
-  double dMajor = getWidth();
-  double dMinor = getHeight();
-  double dValue = dDiffX * dDiffX / dMajor * dMajor +
-                  dDiffY * dDiffY / dMinor * dMinor;
+  double dDiffX = qAbs(center().x() - pt.x());
+  double dDiffY = qAbs(center().y() - pt.y());
+  double dMajor = major();
+  double dMinor = minor();
+  double dValue = (dDiffX * dDiffX) / (dMajor * dMajor) +
+                  (dDiffY * dDiffY) / (dMinor * dMinor);
   if (dValue <= 1) {
     bInside = true;
   }
   return bInside;
 }
 
-bool EllipROI::hitModifyingPos(int x, int y)
+void EllipROI::draw(QPainter& painter) const
 {
-  return false;
+  painter.drawEllipse(rect());
 }

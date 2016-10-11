@@ -9,9 +9,9 @@ public:
   CirROI(unsigned int sn, int x, int y, int radius);
 
 public:
-  auto getRadius(void) const
+  auto radius(void) const
   {
-    return getSize().width;
+    return width() / 2;
   }
 
   virtual const QString getShapeString(void) const final
@@ -19,11 +19,7 @@ public:
     return QString("circle");
   }
 
-  virtual bool checkAmbit(int x, int y) const final;
-
-  virtual bool hitModifyingPos (int x, int y) final;
-
-  virtual void draw(cv::Mat& image) const final;
+  virtual bool contains(const QPoint& pt) const;
 };
 
 #endif // CIRROI_H
