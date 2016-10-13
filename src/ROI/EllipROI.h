@@ -19,14 +19,14 @@ public:
     return height() / 2;
   }
 
-  virtual const QString getShapeString(void) const
+  virtual QString getShapeString(void) const
   {
     return QString("ellipse");
   }
 
   virtual bool contains(const QPoint& pt) const;
 
-  virtual void draw(QPainter& painter) const;
+  virtual void draw(QPainter& painter, double scale = 1.0) const;
 };
 
 #endif // ELLIPROI_H

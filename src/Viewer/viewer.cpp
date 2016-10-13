@@ -20,11 +20,22 @@ Viewer::~Viewer()
 
 }
 
+void Viewer::addModifyingROI(unsigned int sn, const QRect& rect, Shapes shape)
+{
+  auto newMROI = ModifyingROI(sn, rect, shape);
+  for (const auto& mroi : m_listMROI) {
+    if (mroi == newMROI) {
+      return;
+    }
+  }
+  m_listMROI.append(newMROI);
+}
+
 void Viewer::removeModifyingROI(unsigned int sn)
 {
- for (const auto& roi : m_listMROI) {
-   if (roi.SN == sn) {
-     m_listMROI.removeOne(roi);
+  for (const auto& roi : m_listMROI) {
+    if (roi.SN == sn) {
+      m_listMROI.removeOne(roi);
    }
  }
 
@@ -211,4 +222,9 @@ QPoint Viewer::getRightBottom(QPoint& pt1, QPoint& pt2) const
 {
   return QPoint(pt1.x() < pt2.x() ? pt2.x() : pt1.x(),
                 pt1.y() < pt2.y() ? pt2.y() : pt1.y());
+}
+
+void Viewer::setPixmap(const QPixmap& newPixmap)
+{
+  QLabel::setPixmap(newPixmap);
 }

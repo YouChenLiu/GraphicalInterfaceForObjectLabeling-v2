@@ -41,7 +41,7 @@ public:
     filePath = path;
   }
 
-  void addROIs(int iFrameNum, const QList<QSharedPointer<ROIBase>>& ROIs);
+  void addROIs(int iFrameNum, const QList<QSharedPointer<const ROIBase>>& ROIs);
 
   const QList<QSharedPointer<ROIBase>> getROIs(int iFrameNum) const;
 private:

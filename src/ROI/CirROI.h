@@ -6,7 +6,7 @@
 class CirROI final : public EllipROI
 {
 public:
-  CirROI(unsigned int sn, int x, int y, int radius);
+  CirROI(unsigned int sn, int x, int y, int diameter);
 
 public:
   auto radius(void) const
@@ -14,7 +14,12 @@ public:
     return width() / 2;
   }
 
-  virtual const QString getShapeString(void) const final
+  auto diameter(void) const
+  {
+    return width();
+  }
+
+  virtual QString getShapeString(void) const final
   {
     return QString("circle");
   }

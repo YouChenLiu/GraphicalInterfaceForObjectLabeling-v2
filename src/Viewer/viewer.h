@@ -3,6 +3,7 @@
 
 #include <QLabel>
 #include <QList>
+
 #include "common.h"
 
 class Viewer : public QLabel
@@ -58,7 +59,7 @@ private:
       modifyingRect.moveCenter(rect.bottomRight());
     }
 
-    bool operator==(const ModifyingROI& rhs)
+    bool operator==(const ModifyingROI& rhs) const
     {
       return this->SN == rhs.SN;
     }
@@ -98,10 +99,7 @@ public:
     m_bDrawPreview = value;
   }
 
-  void addModifyingROI(unsigned int sn, const QRect& rect, Shapes shape)
-  {
-    m_listMROI.append(ModifyingROI(sn, rect, shape));
-  }
+  void addModifyingROI(unsigned int sn, const QRect& rect, Shapes shape);
 
   void removeModifyingROI(unsigned int sn);
 
@@ -123,6 +121,9 @@ signals:
   void clicked(int x, int y);
 
   void adjustROI(unsigned int sn, const QRect& rect);
+
+public slots:
+  void setPixmap(const QPixmap& newPixmap);
 };
 
 #endif // VIEWER_H

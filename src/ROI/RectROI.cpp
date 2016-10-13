@@ -16,7 +16,7 @@ RectROI::RectROI(unsigned int sn, int x, int y, int width, int height, Shapes sh
   clearState();
 }
 
-void RectROI::draw(QPainter& painter) const
+void RectROI::draw(QPainter& painter, double scale) const
 {
   painter.drawRect(rect());
 }

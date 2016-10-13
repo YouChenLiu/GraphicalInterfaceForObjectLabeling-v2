@@ -110,7 +110,7 @@ public:
     return m_Shape;
   }
 
-  virtual const QString getShapeString(void) const {
+  virtual QString getShapeString(void) const {
     return QString("unknow");
   }
 
@@ -124,7 +124,7 @@ public:
     return contains(QPoint(x, y));
   }
 
-  virtual void draw(QPainter& painter) const = 0;
+  virtual void draw(QPainter& painter, double scale = 1.0) const = 0;
 
   void clearState(void)
   {

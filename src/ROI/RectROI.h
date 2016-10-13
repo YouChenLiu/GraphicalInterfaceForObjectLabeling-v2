@@ -10,12 +10,12 @@ public:
   explicit RectROI(unsigned int sn, const QPoint& ptTopLeft, const QSize& Size, Shapes shape = Shapes::RECTANGLE);
   explicit RectROI(unsigned int sn, int x, int y, int width, int height, Shapes shape = Shapes::RECTANGLE);
 
-  virtual const QString getShapeString(void) const
+  virtual QString getShapeString(void) const
   {
     return QString("rectangle");
   }
 
-  virtual void draw(QPainter& painter) const final;
+  virtual void draw(QPainter& painter, double scale = 1.0) const final;
 };
 
 #endif // RECTROI_H

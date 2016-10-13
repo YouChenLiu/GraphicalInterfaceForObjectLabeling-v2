@@ -2,6 +2,9 @@
     <qresource prefix="/">
         <file>../icon/zoomin.png</file>
         <file>../icon/zoomout.png</file>
-        <file>畢業證書-碩士.jpg</file>
+        <file>../icon/pause.png</file>
+        <file>../icon/playpause.png</file>
+        <file>../icon/next.png</file>
+        <file>../icon/previous.png</file>
     </qresource>
 </RCC>

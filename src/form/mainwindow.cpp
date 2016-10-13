@@ -5,6 +5,7 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QTableWidgetItem>
+#include <QList>
 
 #include "ROI/ROIBase.h"
 #include "ROIManager/ROIManager.h"
@@ -14,16 +15,28 @@ MainWindow::MainWindow(QWidget *parent) :
   ui(new Ui::MainWindow)
 {
   ui->setupUi(this);
+
+  // setting table width
+  ui->ROIList->setColumnWidth(0, 30);
+  ui->ROIList->setColumnWidth(1, 40);
+  ui->ROIList->setColumnWidth(2, 40);
+  ui->ROIList->setColumnWidth(3, 50);
+  ui->ROIList->setColumnWidth(4, 50);
+  ui->ROIList->setColumnWidth(5, 70);
+
+  // initial value
   m_Shape = Shapes::RECTANGLE;
   ui->viewer->setShape(m_Shape);
   ui->viewer->setDrawPreview(true);
+
+  // connect signal and slot
   connect(ui->cbShowRect, SIGNAL(clicked(bool)), this, SLOT(drawROIs()));
   connect(ui->cbShowEllipse, SIGNAL(clicked(bool)), this, SLOT(drawROIs()));
   connect(ui->cbShowCircle, SIGNAL(clicked(bool)), this, SLOT(drawROIs()));
   connect(ui->radioRect, SIGNAL(clicked(bool)), this, SLOT(onShapeChanged(bool)));
   connect(ui->radioEllipse, SIGNAL(clicked(bool)), this, SLOT(onShapeChanged(bool)));
   connect(ui->radioCircle, SIGNAL(clicked(bool)), this, SLOT(onShapeChanged(bool)));
-  connect(&m_ROIManager, SIGNAL(countChanged(const QList<QSharedPointer<ROIBase>>&)), this, SLOT(updateTable(const QList<QSharedPointer<ROIBase>>&)));
+  connect(&m_ROIManager, SIGNAL(onListChanged(QList<QSharedPointer<const ROIBase>>)), this, SLOT(updateTable(const QList<QSharedPointer<const ROIBase>>)));
 }
 
 MainWindow::~MainWindow()
@@ -52,7 +65,7 @@ void MainWindow::on_scalingBar_valueChanged(int value)
 
 void MainWindow::on_viewer_clicked(int x, int y)
 {
-  auto list = m_ROIManager.hit(x, y);
+  const auto list = m_ROIManager.hit(x, y);
   if (list.isEmpty()) {
     ui->viewer->setDrawPreview(true);
   } else {
@@ -79,17 +92,11 @@ void MainWindow::on_viewer_newROI(const QRect& rect)
   default:
     break;
   }
-
-  drawROIs();
 }
 
 void MainWindow::on_viewer_adjustROI(unsigned int sn, const QRect& rect)
 {
-  auto roi = m_ROIManager.getROI(sn);
-  if (roi.isNull()) {
-    return;
-  }
-  roi->setRect(rect);
+  m_ROIManager.adjustROI(sn, rect);
 }
 
 void MainWindow::onShapeChanged(bool)
@@ -104,17 +111,16 @@ void MainWindow::onShapeChanged(bool)
   ui->viewer->setShape(m_Shape);
 }
 
-void MainWindow::updateTable(const QList<QSharedPointer<ROIBase>>& listpROIs)
+void MainWindow::updateTable(const QList<QSharedPointer<const ROIBase>> listpROIs)
 {
   drawROIs();
 
   ui->ROIList->clearContents();
+  ui->ROIList->setRowCount(listpROIs.count());
 
   if (listpROIs.count() == 0) {
     return;
   }
-
-  ui->ROIList->setRowCount(listpROIs.count());
 
   int row = 0;
   for (const auto& roi : listpROIs) {
@@ -145,4 +151,19 @@ void MainWindow::on_btnDelete_clicked()
       m_ROIManager.removeROI(roi->sn());
     }
   }
+}
+
+void MainWindow::on_btnPlayPause_clicked()
+{
+
+}
+
+void MainWindow::on_btnPrevious_clicked()
+{
+
+}
+
+void MainWindow::on_btnNext_clicked()
+{
+
 }

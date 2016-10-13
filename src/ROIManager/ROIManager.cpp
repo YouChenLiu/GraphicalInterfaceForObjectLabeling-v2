@@ -1,5 +1,7 @@
 #include "ROIManager.h"
+
 #include <QRect>
+
 #include "ROI/ROIBase.h"
 #include "ROI/RectROI.h"
 #include "ROI/EllipROI.h"
@@ -15,9 +17,9 @@ ROIManager::~ROIManager()
 {
 }
 
-QList<QSharedPointer<ROIBase>> ROIManager::hit(int x, int y)
+QList<QSharedPointer<const ROIBase>> ROIManager::hit(int x, int y)
 {
-  QList<QSharedPointer<ROIBase>> list;
+  QList<QSharedPointer<const ROIBase>> list;
   for (auto& roi : m_listROI) {
     if (roi->contains(x, y)) {
       roi->setSelected(true);
@@ -29,34 +31,32 @@ QList<QSharedPointer<ROIBase>> ROIManager::hit(int x, int y)
   return list;
 }
 
-QSharedPointer<ROIBase>& ROIManager::getROI(unsigned int sn)
+QList<QSharedPointer<const ROIBase>> ROIManager::getROIs() const
 {
-  for (auto& roi : m_listROI) {
-    if (roi->sn() == sn) {
-      return roi;
-      break;
-    }
+  QList<QSharedPointer<const ROIBase>> list;
+  for (const QSharedPointer<const ROIBase> roi : m_listROI ){
+    list.append(roi);
   }
 
-  return QSharedPointer<ROIBase>();
+  return list;
 }
 
 void ROIManager::addRectROI(int x, int y, int width, int height)
 {
   m_listROI.append(QSharedPointer<RectROI>::create(m_iSNGen++, x, y, width, height));
-  emit countChanged(m_listROI);
+  emit onListChanged(getROIs());
 }
 
 void ROIManager::addEllipROI(int x, int y, int major, int minor)
 {
   m_listROI.append(QSharedPointer<EllipROI>::create(m_iSNGen++, x, y, major, minor));
-  emit countChanged(m_listROI);
+  emit onListChanged(getROIs());
 }
 
 void ROIManager::addCirROI(int x, int y, int radius)
 {
   m_listROI.append(QSharedPointer<CirROI>::create(m_iSNGen++, x, y, radius));
-  emit countChanged(m_listROI);
+  emit onListChanged(getROIs());
 }
 
 void ROIManager::removeROI(unsigned int sn)
@@ -64,9 +64,18 @@ void ROIManager::removeROI(unsigned int sn)
   for (const auto& roi : m_listROI) {
     if (roi->sn() == sn) {
       m_listROI.removeOne(roi);
-      emit countChanged(m_listROI);
+      emit onListChanged(getROIs());
       break;
     }
+  }
+}
+
+void ROIManager::adjustROI(unsigned int sn, const QRect& rect)
+{
+  auto& roi = getROI(sn);
+  if (!roi.isNull()) {
+    roi->setRect(rect);
+    emit onListChanged(getROIs());
   }
 }
 
@@ -90,7 +99,7 @@ void ROIManager::reset()
 {
   m_iSNGen = 0;
   m_listROI.clear();
-  emit countChanged(m_listROI);
+  emit onListChanged(getROIs());
 }
 
 void ROIManager::clearROIState(void)
@@ -98,4 +107,28 @@ void ROIManager::clearROIState(void)
   for (auto& roi : m_listROI) {
     roi->setSelected(false);
   }
+}
+
+QSharedPointer<const ROIBase> ROIManager::getROI(unsigned int sn) const
+{
+  for (auto& roi : m_listROI) {
+    if (roi->sn() == sn) {
+      return roi;
+      break;
+    }
+  }
+
+  return QSharedPointer<const ROIBase>();
+}
+
+QSharedPointer<ROIBase> ROIManager::getROI(unsigned int sn)
+{
+  for (auto& roi : m_listROI) {
+    if (roi->sn() == sn) {
+      return roi;
+      break;
+    }
+  }
+
+  return QSharedPointer<ROIBase>();
 }

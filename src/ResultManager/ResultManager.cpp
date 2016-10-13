@@ -63,7 +63,7 @@ IOResult ResultManager::closeFile()
   return IOResult::SUCCESSFUL;
 }
 
-void ResultManager::addROIs(int iFrameNum, const QList<QSharedPointer<ROIBase>>& ROIs)
+void ResultManager::addROIs(int iFrameNum, const QList<QSharedPointer<const ROIBase> >& ROIs)
 {
   // search the frame number then add the roi
 

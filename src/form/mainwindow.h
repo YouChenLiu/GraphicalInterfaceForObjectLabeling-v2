@@ -34,11 +34,17 @@ private slots:
 
   void onShapeChanged(bool);
 
-  void updateTable(const QList<QSharedPointer<ROIBase>>& listpROIs);
+  void updateTable(const QList<QSharedPointer<const ROIBase> > listpROIs);
 
   void on_btnDelete_clicked();
 
   void drawROIs(void) const;
+
+  void on_btnPlayPause_clicked();
+
+  void on_btnPrevious_clicked();
+
+  void on_btnNext_clicked();
 
 private:
   Ui::MainWindow *ui;

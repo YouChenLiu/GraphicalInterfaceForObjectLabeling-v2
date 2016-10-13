@@ -21,14 +21,11 @@ private:
   unsigned int m_iSNGen;
 
 public:
-  QList<QSharedPointer<ROIBase>> hit(int x, int y);
+  QList<QSharedPointer<const ROIBase>> hit(int x, int y);
 
-  const auto& getROIs(void) const
-  {
-    return m_listROI;
-  }
+  QList<QSharedPointer<const ROIBase>> getROIs(void) const;
 
-  QSharedPointer<ROIBase>& getROI(unsigned int sn);
+  QSharedPointer<const ROIBase> getROI(unsigned int sn) const;
 
   void addRectROI(int x, int y, int width, int height);
 
@@ -38,15 +35,19 @@ public:
 
   void removeROI(unsigned int sn);
 
+  void adjustROI(unsigned int sn, const QRect& rect);
+
   void drawROIs(QPainter& painter, double scale = 1.0, bool bRect = true, bool bEllip = true, bool bCir = true) const;
 
   void reset(void);
 
 signals:
-  void countChanged(const QList<QSharedPointer<ROIBase>>& listpROIs);
+  void onListChanged(const QList<QSharedPointer<const ROIBase>> listpROIs);
 
 private:
   void clearROIState(void);
+
+  QSharedPointer<ROIBase> getROI(unsigned int sn);
 };
 
 #endif // ROIMANAGER_H

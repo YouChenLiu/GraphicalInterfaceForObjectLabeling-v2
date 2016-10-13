@@ -22,7 +22,7 @@ bool EllipROI::contains(const QPoint& pt) const
   return bInside;
 }
 
-void EllipROI::draw(QPainter& painter) const
+void EllipROI::draw(QPainter& painter, double scale) const
 {
   painter.drawEllipse(rect());
 }

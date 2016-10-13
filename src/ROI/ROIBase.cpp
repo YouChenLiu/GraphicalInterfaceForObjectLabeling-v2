@@ -1,6 +1,5 @@
 #include "ROIBase.h"
 #include <QPoint>
-#include <QPainter>
 
 ROIBase::ROIBase(unsigned int sn, const QPoint& ptTopLeft, const QPoint& ptBottomRight, Shapes shape) : QRect(ptTopLeft, ptBottomRight)
 {

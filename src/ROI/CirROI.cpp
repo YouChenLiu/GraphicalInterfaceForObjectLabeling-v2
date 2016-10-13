@@ -2,7 +2,7 @@
 
 #include <QPainter>
 
-CirROI::CirROI(unsigned int sn, int x, int y, int radius) : EllipROI(sn, x, y, radius, radius, Shapes::CIRCLE)
+CirROI::CirROI(unsigned int sn, int x, int y, int diameter) : EllipROI(sn, x, y, diameter, diameter, Shapes::CIRCLE)
 {
   clearState();
 }
