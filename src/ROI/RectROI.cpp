@@ -18,5 +18,7 @@ RectROI::RectROI(unsigned int sn, int x, int y, int width, int height, Shapes sh
 
 void RectROI::draw(QPainter& painter, double scale) const
 {
+  ROIBase::draw(painter, scale);
+
   painter.drawRect(rect());
 }

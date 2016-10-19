@@ -10,6 +10,9 @@
     <height>703</height>
    </rect>
   </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -33,20 +36,26 @@
       <x>670</x>
       <y>100</y>
       <width>291</width>
-      <height>301</height>
+      <height>300</height>
      </rect>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="showDropIndicator" stdset="0">
+     <bool>false</bool>
     </property>
     <property name="selectionBehavior">
      <enum>QAbstractItemView::SelectRows</enum>
     </property>
-    <attribute name="horizontalHeaderHighlightSections">
-     <bool>false</bool>
-    </attribute>
-    <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+    <property name="sortingEnabled">
      <bool>true</bool>
-    </attribute>
+    </property>
     <attribute name="verticalHeaderVisible">
      <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderHighlightSections">
+     <bool>true</bool>
     </attribute>
     <column>
      <property name="text">
@@ -85,19 +94,32 @@
       <x>720</x>
       <y>410</y>
       <width>141</width>
-      <height>121</height>
+      <height>181</height>
      </rect>
     </property>
     <property name="title">
      <string>Size Filter</string>
     </property>
+    <widget class="QCheckBox" name="cbSizeFilter">
+     <property name="geometry">
+      <rect>
+       <x>11</x>
+       <y>21</y>
+       <width>69</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Enable</string>
+     </property>
+    </widget>
     <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>40</y>
        <width>123</width>
-       <height>74</height>
+       <height>126</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout">
@@ -129,9 +151,9 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="label">
         <property name="text">
-         <string>Width</string>
+         <string>X</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -139,7 +161,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="minWidth">
+       <widget class="QLineEdit" name="minX">
         <property name="enabled">
          <bool>false</bool>
         </property>
@@ -155,6 +177,90 @@
        </widget>
       </item>
       <item row="1" column="2">
+       <widget class="QLineEdit" name="maxX">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhNone</set>
+        </property>
+        <property name="inputMask">
+         <string/>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Y</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="minY">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhNone</set>
+        </property>
+        <property name="inputMask">
+         <string/>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLineEdit" name="maxY">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhNone</set>
+        </property>
+        <property name="inputMask">
+         <string/>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Width</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="minWidth">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhNone</set>
+        </property>
+        <property name="inputMask">
+         <string/>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
        <widget class="QLineEdit" name="maxWidth">
         <property name="enabled">
          <bool>false</bool>
@@ -170,7 +276,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="label_4">
         <property name="text">
          <string>Height</string>
@@ -180,7 +286,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="4" column="1">
        <widget class="QLineEdit" name="minHeight">
         <property name="enabled">
          <bool>false</bool>
@@ -190,7 +296,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
+      <item row="4" column="2">
        <widget class="QLineEdit" name="maxHeight">
         <property name="enabled">
          <bool>false</bool>
@@ -201,19 +307,6 @@
        </widget>
       </item>
      </layout>
-    </widget>
-    <widget class="QCheckBox" name="cbSizeFilter">
-     <property name="geometry">
-      <rect>
-       <x>11</x>
-       <y>21</y>
-       <width>69</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Enable</string>
-     </property>
     </widget>
    </widget>
    <widget class="QWidget" name="layoutWidget">
@@ -465,7 +558,7 @@
      <string>Delete</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>240</x>
@@ -539,6 +632,22 @@
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QCheckBox" name="cbReadonly">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>600</y>
+      <width>73</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Readnoly</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -650,8 +759,8 @@
      <y>479</y>
     </hint>
     <hint type="destinationlabel">
-     <x>768</x>
-     <y>529</y>
+     <x>806</x>
+     <y>581</y>
     </hint>
    </hints>
   </connection>
@@ -666,8 +775,8 @@
      <y>479</y>
     </hint>
     <hint type="destinationlabel">
-     <x>768</x>
-     <y>555</y>
+     <x>806</x>
+     <y>607</y>
     </hint>
    </hints>
   </connection>
@@ -682,8 +791,8 @@
      <y>479</y>
     </hint>
     <hint type="destinationlabel">
-     <x>847</x>
-     <y>529</y>
+     <x>851</x>
+     <y>581</y>
     </hint>
    </hints>
   </connection>
@@ -698,8 +807,72 @@
      <y>479</y>
     </hint>
     <hint type="destinationlabel">
-     <x>848</x>
-     <y>555</y>
+     <x>851</x>
+     <y>607</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbSizeFilter</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>minX</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>768</x>
+     <y>471</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>777</x>
+     <y>517</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbSizeFilter</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>maxX</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>764</x>
+     <y>472</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>827</x>
+     <y>516</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbSizeFilter</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>minY</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>743</x>
+     <y>475</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>789</x>
+     <y>542</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbSizeFilter</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>maxY</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>755</x>
+     <y>476</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>829</x>
+     <y>552</y>
     </hint>
    </hints>
   </connection>

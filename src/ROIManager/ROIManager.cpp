@@ -17,7 +17,7 @@ ROIManager::~ROIManager()
 {
 }
 
-QList<QSharedPointer<const ROIBase>> ROIManager::hit(int x, int y)
+QList<QSharedPointer<const ROIBase> > ROIManager::hit(int x, int y)
 {
   QList<QSharedPointer<const ROIBase>> list;
   for (auto& roi : m_listROI) {
@@ -102,6 +102,16 @@ void ROIManager::reset()
   emit onListChanged(getROIs());
 }
 
+void ROIManager::selectROI(unsigned int sn)
+{
+  for (const auto roi : m_listROI) {
+    if (roi->sn() == sn) {
+      roi->setSelected(true);
+      emit onListChanged(getROIs());
+    }
+  }
+}
+
 void ROIManager::clearROIState(void)
 {
   for (auto& roi : m_listROI) {
@@ -109,7 +119,7 @@ void ROIManager::clearROIState(void)
   }
 }
 
-QSharedPointer<const ROIBase> ROIManager::getROI(unsigned int sn) const
+QSharedPointer<const ROIBase> ROIManager::getConstROI(unsigned int sn) const
 {
   for (auto& roi : m_listROI) {
     if (roi->sn() == sn) {
@@ -119,6 +129,21 @@ QSharedPointer<const ROIBase> ROIManager::getROI(unsigned int sn) const
   }
 
   return QSharedPointer<const ROIBase>();
+}
+
+void ROIManager::setROIs(QList<QSharedPointer<ROIBase>>& listpROI)
+{
+  m_listROI = listpROI;
+
+  unsigned int maxSN = 0;
+  for (auto roi : listpROI) {
+    if (roi->sn() > maxSN) {
+      maxSN = roi->sn();
+    }
+  }
+  m_iSNGen = maxSN;
+
+  emit onListChanged(getROIs());
 }
 
 QSharedPointer<ROIBase> ROIManager::getROI(unsigned int sn)

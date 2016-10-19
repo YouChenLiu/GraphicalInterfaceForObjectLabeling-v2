@@ -21,7 +21,10 @@ SOURCES += \
     src/ROI/RectROI.cpp \
     src/ROI/ROIBase.cpp \
     src/ROIManager/ROIManager.cpp \
-    src/Viewer/viewer.cpp
+    src/Viewer/viewer.cpp \
+    src/ImgIO/ImgIOBase.cpp \
+    src/ImgIO/ImgSequence.cpp \
+    src/form/seqdialog.cpp
 
 HEADERS += \
     src/common.h \
@@ -32,10 +35,14 @@ HEADERS += \
     src/ROI/RectROI.h \
     src/ROI/ROIBase.h \
     src/ROIManager/ROIManager.h \
-    src/Viewer/viewer.h
+    src/Viewer/viewer.h \
+    src/ImgIO/ImgIOBase.h \
+    src/ImgIO/ImgSequence.h \
+    src/form/seqdialog.h
 
 FORMS    += \
-    src/form/mainwindow.ui
+    src/form/mainwindow.ui \
+    src/form/seqdialog.ui
 
 RESOURCES += \
     src/form/icon.qrc

@@ -25,7 +25,9 @@ public:
 
   QList<QSharedPointer<const ROIBase>> getROIs(void) const;
 
-  QSharedPointer<const ROIBase> getROI(unsigned int sn) const;
+  QSharedPointer<const ROIBase> getConstROI(unsigned int sn) const;
+
+  void setROIs(QList<QSharedPointer<ROIBase> >& listpROI);
 
   void addRectROI(int x, int y, int width, int height);
 
@@ -41,12 +43,14 @@ public:
 
   void reset(void);
 
+  void selectROI(unsigned int sn);
+
+  void clearROIState(void);
+
 signals:
   void onListChanged(const QList<QSharedPointer<const ROIBase>> listpROIs);
 
 private:
-  void clearROIState(void);
-
   QSharedPointer<ROIBase> getROI(unsigned int sn);
 };
 

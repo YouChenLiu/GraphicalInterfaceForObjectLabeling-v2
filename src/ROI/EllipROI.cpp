@@ -24,5 +24,6 @@ bool EllipROI::contains(const QPoint& pt) const
 
 void EllipROI::draw(QPainter& painter, double scale) const
 {
+  ROIBase::draw(painter, scale);
   painter.drawEllipse(rect());
 }

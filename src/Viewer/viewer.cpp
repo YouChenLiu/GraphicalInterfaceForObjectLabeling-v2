@@ -29,6 +29,7 @@ void Viewer::addModifyingROI(unsigned int sn, const QRect& rect, Shapes shape)
     }
   }
   m_listMROI.append(newMROI);
+  m_bDrawPreview = false;
 }
 
 void Viewer::removeModifyingROI(unsigned int sn)
@@ -42,6 +43,12 @@ void Viewer::removeModifyingROI(unsigned int sn)
  if (m_listMROI.count() == 0) {
    m_bDrawPreview = true;
  }
+}
+
+void Viewer::clearModifyingROI()
+{
+  m_listMROI.clear();
+  m_bDrawPreview = false;
 }
 
 void Viewer::mouseMoveEvent(QMouseEvent* e)

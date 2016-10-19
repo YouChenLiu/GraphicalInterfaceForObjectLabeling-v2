@@ -6,6 +6,11 @@
 #include "common.h"
 #include "ResultManager/ResultManager.h"
 #include "ROIManager/ROIManager.h"
+#include "ImgIO/ImgIOBase.h"
+
+class QTableWidgetItem;
+class QPixmap;
+class SeqDialog;
 
 namespace Ui {
 class MainWindow;
@@ -18,6 +23,15 @@ class MainWindow : public QMainWindow
 public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
+
+public:
+  void dragEnterEvent(QDragEnterEvent*);
+  void dragMoveEvent(QDragMoveEvent*);
+  void dragLeaveEvent(QDragLeaveEvent*);
+  void dropEvent(QDropEvent*);
+
+protected:
+  void MainWindow::closeEvent(QCloseEvent* e);
 
 private slots:
   void on_zoomInButton_clicked();
@@ -46,14 +60,31 @@ private slots:
 
   void on_btnNext_clicked();
 
+  void on_ROIList_itemClicked(QTableWidgetItem *item);
+
+  void on_actionSave_As_triggered();
+
+  void on_actionXML_triggered();
+
+  void on_actionSave_triggered();
+
+  void on_actionSequence_triggered();
+
+  void on_cbReadonly_clicked();
+
+  void on_newSequence(QSharedPointer<ImgIOBase> pImgIO);
+
 private:
   Ui::MainWindow *ui;
-  ResultManager xmlManager;
+  ResultManager m_XMLManager;
   ROIManager m_ROIManager;
   Shapes m_Shape;
+  QSharedPointer<ImgIOBase> m_pImgReader;
+  bool m_bReadonly;
+  SeqDialog* seqDialog;
 
 private:
-
+  void settingByXML(void);
 };
 
 #endif // MAINWINDOW_H

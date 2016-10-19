@@ -14,6 +14,7 @@ protected:
   static const unsigned int PRIVATE_STATE_POS = 0;
   static const unsigned int SELECTED = 0x80 << GLOBAL_STATE_POS;
   static const unsigned int INVISABLE = 0x40 << GLOBAL_STATE_POS;
+  static const unsigned int DISABLE = 0x20 << GLOBAL_STATE_POS;
 private:
   Shapes m_Shape;
   unsigned int m_iSN;
@@ -124,7 +125,7 @@ public:
     return contains(QPoint(x, y));
   }
 
-  virtual void draw(QPainter& painter, double scale = 1.0) const = 0;
+  virtual void draw(QPainter& painter, double scale = 1.0) const;
 
   void clearState(void)
   {
@@ -144,6 +145,13 @@ public:
   {
     return (m_iState & INVISABLE) ? false : true;
   }
+
+  auto enabled(void) const
+  {
+    return (m_iState & DISABLE) ? false : true;
+  }
+
+  void setEnable(bool value);
 
   auto rect(void) const
   {

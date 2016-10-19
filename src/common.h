@@ -19,10 +19,14 @@ enum class IOResult
 {
   SUCCESSFUL,
   FILE_NOT_FOUND,
-  SAVE_FAILED
+  SAVE_FAILED,
+  TEMP_FILE_ERROR,
+  CANCEL_OPERATION,
+  FILE_NOT_SAVED,
+  OPEN_FAILED
 };
 
-const QMap<QString, Shapes> shapeString = {
+const QMap<QString, Shapes> stringShape = {
   {QString("unknow"), Shapes::UNDEFINE},
   {QString("rectangle"), Shapes::RECTANGLE},
   {QString("ellipse"), Shapes::ELLIPSE},
@@ -31,13 +35,12 @@ const QMap<QString, Shapes> shapeString = {
 
 namespace XMLLabel {
 const QString tagRoot("Root");
-const QString tagInfo("Infomation");
+const QString tagInfo("Information");
 const QString tagType("Type");
 const QString tagFirstNum("FirstNumber");
 const QString tagEndNum("EndNumber");
-const QString tagLeadingLength("LeadingLength");
-const QString tagLeadingChar("LeadingCharacter");
-const QString tagPath("Path");
+const QString tagPaddingLength("PaddingLength");
+const QString tagExt("Extension");
 const QString tagCreationDate("CreationDate");
 const QString tagModifyDate("ModifyDate");
 const QString tagDataSet("DataSet");
@@ -54,7 +57,17 @@ const QString attrSN("sn");
 }
 
 namespace Keys {
-  const Qt::Key move = Qt::Key_Shift;
+  const Qt::Key del = Qt::Key_Delete;
+}
+
+namespace Colors {
+  const Qt::GlobalColor normal = Qt::green;
+  const Qt::GlobalColor disabled = Qt::gray;
+}
+
+namespace LineStyle {
+  const Qt::PenStyle normal = Qt::SolidLine;
+  const Qt::PenStyle disabled = Qt::DotLine;
 }
 
 #endif // COMMON_H

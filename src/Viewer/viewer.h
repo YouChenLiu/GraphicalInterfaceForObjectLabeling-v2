@@ -103,6 +103,8 @@ public:
 
   void removeModifyingROI(unsigned int sn);
 
+  void clearModifyingROI(void);
+
 protected:
   void mouseMoveEvent(QMouseEvent* e);
   void mousePressEvent(QMouseEvent* e);
