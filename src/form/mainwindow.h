@@ -30,6 +30,8 @@ public:
   void dragLeaveEvent(QDragLeaveEvent*);
   void dropEvent(QDropEvent*);
 
+  void MainWindow::keyPressEvent(QKeyEvent*);
+
 protected:
   void MainWindow::closeEvent(QCloseEvent* e);
 
@@ -74,6 +76,10 @@ private slots:
 
   void on_newSequence(QSharedPointer<ImgIOBase> pImgIO);
 
+  void onPlay(void);
+
+  void on_actionAbout_triggered();
+
 private:
   Ui::MainWindow *ui;
   ResultManager m_XMLManager;
@@ -82,6 +88,8 @@ private:
   QSharedPointer<ImgIOBase> m_pImgReader;
   bool m_bReadonly;
   SeqDialog* seqDialog;
+  bool m_bPlaying;
+  QTimer* m_Timer;
 
 private:
   void settingByXML(void);

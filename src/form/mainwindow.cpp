@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "seqdialog.h"
+#include "aboutdialog.h"
 #include "ui_mainwindow.h"
 #include "ui_seqdialog.h"
 #include <QKeyEvent>
@@ -13,6 +14,9 @@
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QMimeData>
+#include <QKeyEvent>
+#include <QTimer>
+
 #include "ROI/ROIBase.h"
 #include "ROIManager/ROIManager.h"
 #include "ImgIO/ImgSequence.h"
@@ -35,8 +39,11 @@ MainWindow::MainWindow(QWidget *parent) :
   m_Shape = Shapes::RECTANGLE;
   ui->viewer->setShape(m_Shape);
   m_bReadonly = false;
+  m_bPlaying = false;
   ui->viewer->setDrawPreview(false);
   seqDialog = new SeqDialog(this);
+  m_Timer = new QTimer(this);
+
 
   // connect signal and slot
   connect(ui->cbShowRect, SIGNAL(clicked(bool)), this, SLOT(drawROIs()));
@@ -46,19 +53,20 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(ui->radioEllipse, SIGNAL(clicked(bool)), this, SLOT(onShapeChanged(bool)));
   connect(ui->radioCircle, SIGNAL(clicked(bool)), this, SLOT(onShapeChanged(bool)));
   connect(&m_ROIManager, SIGNAL(onListChanged(QList<QSharedPointer<const ROIBase>>)), this, SLOT(updateTable(const QList<QSharedPointer<const ROIBase>>)));
-  connect(seqDialog, SIGNAL(newSequence(QSharedPointer<ImgIOBase>)), SLOT(on_newSequence(QSharedPointer<ImgIOBase>)));
+  connect(seqDialog, SIGNAL(newSequence(QSharedPointer<ImgIOBase>)), this, SLOT(on_newSequence(QSharedPointer<ImgIOBase>)));
+  connect(m_Timer, SIGNAL(timeout()), this, SLOT(onPlay()));
 }
 
 MainWindow::~MainWindow()
 {
-
   delete ui;
 }
 
 void MainWindow::settingByXML()
 {
-  QString sType = m_XMLManager.type();
-  if (StringType[sType] == SrcType::IMAGE) {
+  auto type = m_XMLManager.type();
+  if (type == SrcType::IMAGE) {
+    // take out the image sequence information then read
     int firstNum = m_XMLManager.firstNum();
     int endNum = m_XMLManager.endNum();
     int length = m_XMLManager.paddingLength();
@@ -68,9 +76,23 @@ void MainWindow::settingByXML()
     QSharedPointer<ImgSequence> seq = QSharedPointer<ImgSequence>::create(root, ext, tr(""), length, firstNum);
     seq->setEndNum(endNum);
     m_pImgReader = seq;
+  } else if (type == SrcType::VIDEO) {
+    // take out the video information then read
   }
 
   m_ROIManager.setROIs(m_XMLManager.getROIs(m_pImgReader->currentNum()));
+  ui->sliderProgress->setRange(m_pImgReader->firstNum(), m_pImgReader->endNum());
+  ui->labelStart->setText(QString::number(m_pImgReader->firstNum()));
+  ui->labelEnd->setText(QString::number(m_pImgReader->endNum()));
+}
+
+void MainWindow::onPlay()
+{
+  if (m_bPlaying) {
+    on_btnNext_clicked();
+  } else {
+    m_Timer->stop();
+  }
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent* e)
@@ -98,8 +120,32 @@ void MainWindow::dropEvent(QDropEvent* e)
     // get dropped url
     QList<QUrl> urlList = mimeData->urls();
     QString filePath = urlList.at(0).toLocalFile();
-    m_XMLManager.openFile(filePath);
-    settingByXML();
+    auto pos = filePath.lastIndexOf(QChar('.'));
+    auto ext = filePath.mid(pos + 1);
+    if (ext.compare(QString("xml"), Qt::CaseInsensitive) == 0) {
+      m_XMLManager.openFile(filePath);
+      settingByXML();
+    } else {
+      seqDialog->dropEvent(e);
+      seqDialog->show();
+    }
+  }
+}
+
+void MainWindow::MainWindow::keyPressEvent(QKeyEvent* e)
+{
+  switch (e->key()) {
+  case Keys::del:
+    on_btnDelete_clicked();
+    break;
+  case Keys::next:
+    on_btnNext_clicked();
+    break;
+  case Keys::prevuous:
+    on_btnPrevious_clicked();
+    break;
+  default:
+    break;
   }
 }
 
@@ -223,6 +269,10 @@ void MainWindow::updateTable(const QList<QSharedPointer<const ROIBase>> listpROI
 
 void MainWindow::drawROIs(void) const
 {
+  if (m_pImgReader.isNull()) {
+    return;
+  }
+
   QPixmap pixmap = m_pImgReader->getFrame();
   QPainter painter(&pixmap);
   m_ROIManager.drawROIs(painter, 1.0, ui->cbShowRect->isChecked(), ui->cbShowEllipse->isChecked(), ui->cbShowCircle->isChecked());
@@ -242,30 +292,49 @@ void MainWindow::on_btnDelete_clicked()
 
 void MainWindow::on_btnPlayPause_clicked()
 {
-
+  m_bPlaying = !m_bPlaying;
+  if (m_bPlaying) {
+    m_Timer->start(35);
+  }
 }
 
 void MainWindow::on_btnPrevious_clicked()
 {
+  if (m_pImgReader.isNull()) {
+    return;
+  }
+
   if (m_pImgReader->hasPrevious()) {
     m_XMLManager.addROIs(m_pImgReader->currentNum(), m_ROIManager.getROIs());
     m_XMLManager.saveTempFile();
     m_pImgReader->queryPre();
+    ui->sliderProgress->setValue(m_pImgReader->currentNum());
     m_ROIManager.setROIs(m_XMLManager.getROIs(m_pImgReader->currentNum()));
   }
 }
 
 void MainWindow::on_btnNext_clicked()
 {
+  if (m_pImgReader.isNull()) {
+    return;
+  }
+
   if (m_pImgReader->hasNext()) {
     m_XMLManager.addROIs(m_pImgReader->currentNum(), m_ROIManager.getROIs());
     m_XMLManager.saveTempFile();
     m_pImgReader->queryNext();
+
+    ui->labelEnd->setText(QString::number(m_pImgReader->endNum() - 1));
+    ui->sliderProgress->setRange(m_pImgReader->firstNum(), m_pImgReader->endNum() - 1);
+    ui->sliderProgress->setValue(m_pImgReader->currentNum());
+
     if (m_XMLManager.hasFrame(m_pImgReader->currentNum())) {
       m_ROIManager.setROIs(m_XMLManager.getROIs(m_pImgReader->currentNum()));
     } else {
       m_ROIManager.reset();
     }
+  } else {
+    m_bPlaying = false;
   }
 }
 
@@ -298,6 +367,7 @@ void MainWindow::on_actionSave_triggered()
 
 void MainWindow::on_actionSequence_triggered()
 {
+  seqDialog->clear();
   seqDialog->show();
 }
 
@@ -313,5 +383,27 @@ void MainWindow::on_newSequence(QSharedPointer<ImgIOBase> pImgIO)
     QMessageBox::information(this, tr("Image IO ERROR"), tr("Invalid image sequence."));
     return;
   }
+
+  if (ImgSeqPtr pSeq = pImgIO.dynamicCast<ImgSequence>()) {
+    m_XMLManager.setType(SrcType::IMAGE);
+    m_XMLManager.setFirstNum(pSeq->firstNum());
+    m_XMLManager.setEndNum(pSeq->endNum());
+    m_XMLManager.setPaddingLength(pSeq->paddingLen());
+    m_XMLManager.setExtension(pSeq->extension());
+    m_XMLManager.setDefaultPath(pSeq->root());
+
+    ui->labelStart->setText(QString::number(pSeq->firstNum()));
+    ui->labelEnd->setText(QString::number(pSeq->firstNum()));
+    ui->sliderProgress->setMinimum(pSeq->firstNum());
+    ui->sliderProgress->setMaximum(pSeq->firstNum());
+  }
+
   m_pImgReader = pImgIO;
+  m_ROIManager.setROIs(m_XMLManager.getROIs(m_pImgReader->firstNum()));
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+  AboutDialog* about = new AboutDialog(this);
+  about->show();
 }

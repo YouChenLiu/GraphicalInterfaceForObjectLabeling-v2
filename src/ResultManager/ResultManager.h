@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QDomDocument>
 #include <QSet>
+
 #include "common.h"
 
 class ROIBase;
@@ -21,47 +22,67 @@ public slots:
 
 private:
   struct Info {
-    QString Type;
-    int iFirstNum;
-    int iEndNum;
-    int iPaddingLength;
-    QChar cPaddingChar;
+    SrcType Type;
+    unsigned int iFirstNum;
+    unsigned int iEndNum;
+    unsigned int iPaddingLength;
     QString sExtension;
     QString CreationDate;
-    QString ModifyDate;
   } m_Info;
+
+  const QMap<SrcType, QString> TypeStr = {
+    {SrcType::IMAGE, QString("ImgSeq")},
+    {SrcType::VIDEO, QString("Video")}
+  };
+
+  const QMap<QString, SrcType> StrType = {
+    {QString("ImgSeq"), SrcType::IMAGE},
+    {QString("Video"), SrcType::VIDEO}
+  };
 
 public:
   auto type(void) const
   {
     return m_Info.Type;
   }
+
+  void setType(SrcType type);
+
   auto firstNum(void)
   {
     return m_Info.iFirstNum;
   }
+
+  void setFirstNum(unsigned int value);
+
   auto endNum(void) const
   {
     return m_Info.iEndNum;
   }
+
+  void setEndNum(unsigned int value);
+
   auto paddingLength(void) const
   {
     return m_Info.iPaddingLength;
   }
-  auto paddingChar(void) const
-  {
-    return m_Info.cPaddingChar;
-  }
+
+  void setPaddingLength(unsigned int value);
+
   auto extension(void) const
   {
     return m_Info.sExtension;
   }
+
+  void setExtension(const QString& ext);
 
 private:
   QString m_sTempPath;
   QString m_sFilePath;
   QDomDocument m_Document;
   QSet<unsigned int> m_Frames;
+  QString m_sDefaultPath;
+  bool m_bTempFileSaved;
 
 public:
   void create(void);
@@ -90,10 +111,19 @@ public:
     return m_Frames.contains(iFrameNum);
   }
 
+  void setDefaultPath(const QString& path)
+  {
+    m_sDefaultPath = path;
+  }
+
 private:
+  QDomElement createTextTag(const QString& tagName, const QString& text);
+
   IOResult saveTo(const QString& path);
 
   void readXML(void);
+
+  void modifyInfoTag(const QDomElement& tag);
 };
 
 #endif // RESULTMANAGER_H

@@ -23,6 +23,8 @@ public:
   void dragLeaveEvent(QDragLeaveEvent*);
   void dropEvent(QDropEvent*);
 
+  void clear(void);
+
 signals:
   void newSequence(QSharedPointer<ImgIOBase> pSeq);
 

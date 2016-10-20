@@ -87,7 +87,7 @@
 Comfirm the settings and press OK.</string>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>11</x>
@@ -120,7 +120,7 @@ Comfirm the settings and press OK.</string>
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>11</x>
@@ -149,7 +149,7 @@ Comfirm the settings and press OK.</string>
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>250</x>
@@ -184,6 +184,16 @@ Comfirm the settings and press OK.</string>
       </item>
       <item>
        <property name="text">
+        <string>png</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>tiff</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
         <string>jpg</string>
        </property>
       </item>
@@ -196,7 +206,7 @@ Comfirm the settings and press OK.</string>
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>160</x>
@@ -237,7 +247,7 @@ Comfirm the settings and press OK.</string>
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>360</x>
@@ -269,10 +279,13 @@ Comfirm the settings and press OK.</string>
     </item>
    </layout>
   </widget>
+  <zorder>layoutWidget</zorder>
+  <zorder>layoutWidget</zorder>
+  <zorder>layoutWidget</zorder>
+  <zorder>layoutWidget</zorder>
+  <zorder>layoutWidget</zorder>
   <zorder>buttonBox</zorder>
   <zorder>layoutWidget</zorder>
-  <zorder>layoutWidget_2</zorder>
-  <zorder>label_5</zorder>
   <zorder>label_7</zorder>
  </widget>
  <resources/>

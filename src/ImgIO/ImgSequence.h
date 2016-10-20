@@ -26,6 +26,26 @@ public:
     return QString("ImgSeq");
   }
 
+  auto root(void) const
+  {
+    return m_sRoot;
+  }
+
+  auto prefix(void) const
+  {
+    return m_sPrefix;
+  }
+
+  auto extension(void) const
+  {
+    return m_sExtName;
+  }
+
+  auto paddingLen(void) const
+  {
+    return m_iPadding;
+  }
+
   virtual QPixmap queryNext(void);
 
   virtual QPixmap queryPre(void);
@@ -41,5 +61,7 @@ private:
 
   QPixmap loadImg(unsigned int num) const;
 };
+
+typedef QSharedPointer<ImgSequence> ImgSeqPtr;
 
 #endif // IMGSEQUENCE_H

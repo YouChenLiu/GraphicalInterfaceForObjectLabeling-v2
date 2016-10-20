@@ -123,3 +123,12 @@ void SeqDialog::dropEvent(QDropEvent* e)
     ui->spinLength->setValue(number.length());
   }
 }
+
+void SeqDialog::clear()
+{
+  ui->textPath->clear();
+  ui->textPrefix->clear();
+  ui->spinLength->setValue(4);
+  ui->comboExt->setCurrentIndex(0);
+  ui->spinFirstNum->setValue(0);
+}

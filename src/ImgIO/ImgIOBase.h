@@ -4,20 +4,10 @@
 #include <QObject>
 #include <QPixmap>
 #include <QMap>
-#include <QString>
 
 #include <opencv2/highgui.hpp>
 
-enum class SrcType
-{
-  IMAGE,
-  VIDEO
-};
-
-const QMap<QString, SrcType> StringType = {
-  {QString("ImgSeq"), SrcType::IMAGE},
-  {QString("Video"), SrcType::VIDEO}
-};
+#include "common.h"
 
 class ImgIOBase : public QObject
 {

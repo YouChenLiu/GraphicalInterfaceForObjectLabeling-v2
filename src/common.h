@@ -15,6 +15,12 @@ enum class Shapes
   CIRCLE
 };
 
+enum class SrcType
+{
+  IMAGE,
+  VIDEO
+};
+
 enum class IOResult
 {
   SUCCESSFUL,
@@ -23,7 +29,8 @@ enum class IOResult
   TEMP_FILE_ERROR,
   CANCEL_OPERATION,
   FILE_NOT_SAVED,
-  OPEN_FAILED
+  OPEN_FAILED,
+  SETTING_NOT_CLEAR
 };
 
 const QMap<QString, Shapes> stringShape = {
@@ -58,6 +65,8 @@ const QString attrSN("sn");
 
 namespace Keys {
   const Qt::Key del = Qt::Key_Delete;
+  const Qt::Key next = Qt::Key_Period;
+  const Qt::Key prevuous = Qt::Key_Comma;
 }
 
 namespace Colors {

@@ -6,5 +6,6 @@
         <file>../icon/playpause.png</file>
         <file>../icon/next.png</file>
         <file>../icon/previous.png</file>
+        <file>../icon/mark.png</file>
     </qresource>
 </RCC>

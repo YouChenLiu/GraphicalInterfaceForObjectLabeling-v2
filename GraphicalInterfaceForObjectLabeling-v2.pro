@@ -24,7 +24,8 @@ SOURCES += \
     src/Viewer/viewer.cpp \
     src/ImgIO/ImgIOBase.cpp \
     src/ImgIO/ImgSequence.cpp \
-    src/form/seqdialog.cpp
+    src/form/seqdialog.cpp \
+    src/form/aboutdialog.cpp
 
 HEADERS += \
     src/common.h \
@@ -38,11 +39,13 @@ HEADERS += \
     src/Viewer/viewer.h \
     src/ImgIO/ImgIOBase.h \
     src/ImgIO/ImgSequence.h \
-    src/form/seqdialog.h
+    src/form/seqdialog.h \
+    src/form/aboutdialog.h
 
 FORMS    += \
     src/form/mainwindow.ui \
-    src/form/seqdialog.ui
+    src/form/seqdialog.ui \
+    src/form/aboutdialog.ui
 
 RESOURCES += \
     src/form/icon.qrc

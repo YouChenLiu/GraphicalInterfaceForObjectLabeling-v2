@@ -16,7 +16,66 @@
 ResultManager::ResultManager(QObject *parent) : QObject(parent)
 {
   m_sTempPath = QDir::tempPath() + "/temp.xml";
+  m_sDefaultPath = QString();
+  m_bTempFileSaved = false;
   create();
+}
+
+void ResultManager::setType(SrcType type)
+{
+  // set type tag
+  auto infoTag = m_Document.firstChildElement(XMLLabel::tagRoot).firstChildElement(XMLLabel::tagInfo);
+  auto typeTag = infoTag.firstChildElement(XMLLabel::tagType);
+  auto typeText = m_Document.createTextNode(TypeStr[type]);
+  typeTag.appendChild(typeText);
+
+  if (type == SrcType::IMAGE) {
+    auto firstNumTag = m_Document.createElement(XMLLabel::tagFirstNum);
+    infoTag.appendChild(firstNumTag);
+
+    auto endNumTag = m_Document.createElement(XMLLabel::tagEndNum);
+    infoTag.appendChild(endNumTag);
+
+    auto paddingLengthTag = m_Document.createElement(XMLLabel::tagPaddingLength);
+    infoTag.appendChild(paddingLengthTag);
+
+    auto extTag = m_Document.createElement(XMLLabel::tagExt);
+    infoTag.appendChild(extTag);
+  } else if (type == SrcType::VIDEO) {
+
+  }
+}
+
+void ResultManager::setFirstNum(unsigned int value)
+{
+  m_Info.iFirstNum = value;
+
+  auto firstNumTag = createTextTag(XMLLabel::tagFirstNum, QString::number(value));
+  modifyInfoTag(firstNumTag);
+}
+
+void ResultManager::setEndNum(unsigned int value)
+{
+  m_Info.iEndNum = value;
+
+  auto endNumTag = createTextTag(XMLLabel::tagEndNum, QString::number(value));
+  modifyInfoTag(endNumTag);
+}
+
+void ResultManager::setPaddingLength(unsigned int value)
+{
+  m_Info.iPaddingLength = value;
+
+  auto paddingLengthTag = createTextTag(XMLLabel::tagPaddingLength, QString::number(value));
+  modifyInfoTag(paddingLengthTag);
+}
+
+void ResultManager::setExtension(const QString& ext)
+{
+  m_Info.sExtension = ext;
+
+  auto extTag = createTextTag(XMLLabel::tagExt, ext);
+  modifyInfoTag(extTag);
 }
 
 IOResult ResultManager::openFile(QString& path)
@@ -51,13 +110,14 @@ IOResult ResultManager::openFile(QString& path)
 IOResult ResultManager::saveFile(void)
 {
   if (m_sFilePath.isEmpty()) {
-    m_sFilePath = QFileDialog::getSaveFileName(nullptr, tr("Save File"));
+    m_sFilePath = QFileDialog::getSaveFileName(nullptr, tr("Save File"), m_sDefaultPath, tr("XML (*.xml)"));
   }
   return saveTo(m_sFilePath);
 }
 
 IOResult ResultManager::saveTempFile(void)
 {
+  m_bTempFileSaved = true;
   return saveTo(m_sTempPath);
 }
 
@@ -77,8 +137,8 @@ IOResult ResultManager::closeFile(bool force)
 
   QFile file(m_sFilePath);
   QFile tempFile(m_sTempPath);
-  if (m_sFilePath.isEmpty()) {
-    force = true;
+  if (m_bTempFileSaved && m_sFilePath.isEmpty()) {
+    return IOResult::FILE_NOT_SAVED;
   }
   if (!force) {
     file.open(QIODevice::ReadOnly);
@@ -241,6 +301,14 @@ QList<QSharedPointer<ROIBase>> ResultManager::getROIs(int iFrameNum) const
   return ROIs;
 }
 
+QDomElement ResultManager::createTextTag(const QString& tagName, const QString& text)
+{
+  auto newTag = m_Document.createElement(tagName);
+  auto newTagStr = m_Document.createTextNode(text);
+  newTag.appendChild(newTagStr);
+  return newTag;
+}
+
 IOResult ResultManager::saveTo(const QString& path)
 {
   QFile file(path);
@@ -265,51 +333,69 @@ void ResultManager::readXML()
   if (info.isNull()) {
     return;
   }
-  m_Info.Type = info.firstChildElement(XMLLabel::tagType).text();
-  m_Info.CreationDate = info.firstChildElement(XMLLabel::tagCreationDate).text();
-  m_Info.iFirstNum = info.firstChildElement(XMLLabel::tagFirstNum).text().toInt();
-  m_Info.iEndNum = info.firstChildElement(XMLLabel::tagEndNum).text().toInt();
-  m_Info.iPaddingLength = info.firstChildElement(XMLLabel::tagPaddingLength).text().toInt();
-  m_Info.sExtension = info.firstChildElement(XMLLabel::tagExt).text();
 
-  for (int i = m_Info.iFirstNum; i <= m_Info.iEndNum; ++i) {
-    m_Frames.insert(i);
+  auto sType = info.firstChildElement(XMLLabel::tagType).text();
+  m_Info.Type = StrType[sType];
+  switch (m_Info.Type) {
+  case SrcType::IMAGE:
+    m_Info.CreationDate = info.firstChildElement(XMLLabel::tagCreationDate).text();
+    m_Info.iFirstNum = info.firstChildElement(XMLLabel::tagFirstNum).text().toInt();
+    m_Info.iEndNum = info.firstChildElement(XMLLabel::tagEndNum).text().toInt();
+    m_Info.iPaddingLength = info.firstChildElement(XMLLabel::tagPaddingLength).text().toInt();
+    m_Info.sExtension = info.firstChildElement(XMLLabel::tagExt).text();
+
+    for (auto i = m_Info.iFirstNum; i <= m_Info.iEndNum; ++i) {
+      m_Frames.insert(i);
+    }
+    break;
+  case SrcType::VIDEO:
+    break;
+  default:
+    break;
+  }
+}
+
+void ResultManager::modifyInfoTag(const QDomElement& tag)
+{
+  auto infoTag = m_Document.firstChildElement(XMLLabel::tagRoot).firstChildElement(XMLLabel::tagInfo);
+  auto result = infoTag.elementsByTagName(tag.tagName());
+  if (result.isEmpty()) {
+    infoTag.appendChild(tag);
+  } else {
+    infoTag.replaceChild(tag, result.item(0));
   }
 }
 
 void ResultManager::create(void)
 {
   //setting XML declaration
-  auto declaration = m_Document.createProcessingInstruction(tr("xml"),
-                                                        tr("version=\"1.0\" encoding=\"UTF-8\""));
+  auto declaration = m_Document.createProcessingInstruction(
+        tr("xml"),
+        tr("version=\"1.0\" encoding=\"UTF-8\""));
   m_Document.appendChild(declaration);
-  using namespace XMLLabel;
-  //setting video name tag
-//  QDomText videoNameText = result.createTextNode("");
-//  QDomElement videoNameTag = result.createElement(tag);
-//  videoNameTag.appendChild(videoNameText);
-  //setting create date tag
-  QDomElement createDateTag = m_Document.createElement(tagCreationDate);
-  QDate currentDate = QDate::currentDate();
-  QDomText createDateText = m_Document.createTextNode(currentDate.toString("yyyy/MM/dd"));
-  createDateTag.appendChild(createDateText);
-  //setting lastest modify date tag
-  QDomElement lastModifyDateTag = m_Document.createElement(tagModifyDate);
-  //setting file description tag
-  QDomElement infoTag = m_Document.createElement(tagInfo);
-//  infoTag.appendChild(videoNameTag);
-  infoTag.appendChild(createDateTag);
-  infoTag.appendChild(lastModifyDateTag);
-  //setting header tag with frame 0
-//  QDomElement headerTag = result.createElement(tr(HEADER_TAG));
-//  headerTag.setAttribute(tr(FRAME_NUMBER_ATTRIBUTE), 0);
-//  headerTag.setAttribute(tr(TOTAL_RECORD_ATTRIBUTE), 0);
-  //setting date set tag
-  QDomElement dataSetTag = m_Document.createElement(tagDataSet);
-//  dataSetTag.appendChild(headerTag);
+
   //setting root tag
-  QDomElement rootTag = m_Document.createElement(tagRoot);
+  QDomElement rootTag = m_Document.createElement(XMLLabel::tagRoot);
+
+  // create information tag
+  QDomElement infoTag = m_Document.createElement(XMLLabel::tagInfo);
+
+  // set type tag
+  QDomElement typeTag = m_Document.createElement(XMLLabel::tagType);
+  infoTag.appendChild(typeTag);
+
+  // set create date tag
+  QDomText createDateText = m_Document.createTextNode(QDate::currentDate().toString("yyyy/MM/dd"));
+  QDomElement createDateTag = m_Document.createElement(XMLLabel::tagCreationDate);
+  createDateTag.appendChild(createDateText);
+  infoTag.appendChild(createDateTag);
+
+  // add information tag
   rootTag.appendChild(infoTag);
+
+  //setting date set tag
+  QDomElement dataSetTag = m_Document.createElement(XMLLabel::tagDataSet);
   rootTag.appendChild(dataSetTag);
+
   m_Document.appendChild(rootTag);
 }
