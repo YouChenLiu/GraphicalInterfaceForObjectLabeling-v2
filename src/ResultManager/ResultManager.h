@@ -97,9 +97,11 @@ public:
 
   IOResult closeFile(bool force = false);
 
-  void addROIs(int iFrameNum, const QList<QSharedPointer<const ROIBase>>& ROIs);
+  void addROIs(unsigned int iFrameNum, const QList<QSharedPointer<const ROIBase>>& ROIs);
 
   QList<QSharedPointer<ROIBase>> getROIs(int iFrameNum) const;
+
+  void reset(void);
 
   auto filePath(void) const
   {

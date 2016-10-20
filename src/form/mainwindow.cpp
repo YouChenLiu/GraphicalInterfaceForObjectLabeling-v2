@@ -174,10 +174,7 @@ void MainWindow::on_zoomOutButton_clicked()
 
 void MainWindow::on_scalingBar_valueChanged(int value)
 {
-  auto geometry = ui->viewer->geometry();
-  auto x = geometry.x(), y = geometry.y();
-  auto width = DEFAULT_WIDTH * value, height = DEFAULT_HEIGHT * value;
-  //ui->viewer->setGeometry(x, y, width, height);
+
 }
 
 void MainWindow::on_viewer_clicked(int x, int y)
@@ -351,6 +348,8 @@ void MainWindow::on_ROIList_itemClicked(QTableWidgetItem *item)
 
 void MainWindow::on_actionSave_As_triggered()
 {
+  m_XMLManager.addROIs(m_pImgReader->currentNum(), m_ROIManager.getROIs());
+  m_XMLManager.saveTempFile();
   m_XMLManager.saveAs();
 }
 
@@ -362,6 +361,8 @@ void MainWindow::on_actionXML_triggered()
 
 void MainWindow::on_actionSave_triggered()
 {
+  m_XMLManager.addROIs(m_pImgReader->currentNum(), m_ROIManager.getROIs());
+  m_XMLManager.saveTempFile();
   m_XMLManager.saveFile();
 }
 
@@ -406,4 +407,15 @@ void MainWindow::on_actionAbout_triggered()
 {
   AboutDialog* about = new AboutDialog(this);
   about->show();
+}
+
+void MainWindow::on_actionClose_triggered()
+{
+//  if (m_pImgReader.isNull()) {
+//    return;
+//  }
+
+//  m_XMLManager.addROIs(m_pImgReader->currentNum(), m_ROIManager.getROIs());
+//  m_XMLManager.saveTempFile();
+//  m_XMLManager.closeFile();
 }

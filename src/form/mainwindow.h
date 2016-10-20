@@ -80,6 +80,8 @@ private slots:
 
   void on_actionAbout_triggered();
 
+  void on_actionClose_triggered();
+
 private:
   Ui::MainWindow *ui;
   ResultManager m_XMLManager;

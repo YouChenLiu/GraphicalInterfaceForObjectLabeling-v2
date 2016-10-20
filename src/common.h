@@ -30,7 +30,8 @@ enum class IOResult
   CANCEL_OPERATION,
   FILE_NOT_SAVED,
   OPEN_FAILED,
-  SETTING_NOT_CLEAR
+  SETTING_NOT_CLEAR,
+  FILE_PATH_NOT_SET
 };
 
 const QMap<QString, Shapes> stringShape = {

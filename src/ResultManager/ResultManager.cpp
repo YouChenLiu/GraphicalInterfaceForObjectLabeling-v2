@@ -11,7 +11,6 @@
 #include "ROI/RectROI.h"
 #include "ROI/EllipROI.h"
 #include "ROI/CirROI.h"
-#include <QDebug>
 
 ResultManager::ResultManager(QObject *parent) : QObject(parent)
 {
@@ -134,13 +133,21 @@ IOResult ResultManager::saveAs()
 
 IOResult ResultManager::closeFile(bool force)
 {
-
-  QFile file(m_sFilePath);
-  QFile tempFile(m_sTempPath);
   if (m_bTempFileSaved && m_sFilePath.isEmpty()) {
     return IOResult::FILE_NOT_SAVED;
   }
+
+  if (!m_bTempFileSaved) {
+    force = true;
+  }
+
+  QFile tempFile(m_sTempPath);
+
   if (!force) {
+    if (m_sFilePath.isNull()) {
+      return IOResult::FILE_PATH_NOT_SET;
+    }
+    QFile file(m_sFilePath);
     file.open(QIODevice::ReadOnly);
     tempFile.open(QIODevice::ReadOnly);
     // check the change of temp file by computing hash
@@ -152,8 +159,6 @@ IOResult ResultManager::closeFile(bool force)
       auto tempResult = tempHash.result();
       if (result != tempResult) {
         return IOResult::FILE_NOT_SAVED;
-      } else {
-        qDebug() << "same hash";
       }
     } else {
       return IOResult::OPEN_FAILED;
@@ -168,7 +173,7 @@ IOResult ResultManager::closeFile(bool force)
   return IOResult::SUCCESSFUL;
 }
 
-void ResultManager::addROIs(int iFrameNum, const QList<QSharedPointer<const ROIBase> >& ROIs)
+void ResultManager::addROIs(unsigned int iFrameNum, const QList<QSharedPointer<const ROIBase> >& ROIs)
 {
   // create new frame element
   auto newFrame = m_Document.createElement(XMLLabel::tagFrame);
@@ -184,43 +189,38 @@ void ResultManager::addROIs(int iFrameNum, const QList<QSharedPointer<const ROIB
     recordElement.setAttribute(XMLLabel::attrSN, roi->sn());
 
     // shape
-    auto shapeText = m_Document.createTextNode(roi->getShapeString());
-    auto shapeElement = m_Document.createElement(XMLLabel::tagShape);
-    shapeElement.appendChild(shapeText);
-    recordElement.appendChild(shapeElement);
+    auto shapeTag = createTextTag(XMLLabel::tagShape, roi->getShapeString());
+    recordElement.appendChild(shapeTag);
 
     // start point
     auto pt = roi->topLeft();
-    auto SPText = m_Document.createTextNode(QString("%1, %2").arg(pt.x()).arg(pt.y()));
-    auto SPElement = m_Document.createElement(XMLLabel::tagStartPoint);
-    SPElement.appendChild(SPText);
-    recordElement.appendChild(SPElement);
+    auto startPtStr = QString("%1, %2").arg(pt.x()).arg(pt.y());
+    auto startPtTag = createTextTag(XMLLabel::tagStartPoint, startPtStr);
+    recordElement.appendChild(startPtTag);
 
     // width
-    auto widthText = m_Document.createTextNode(QString::number(roi->width()));
-    auto widthElement = m_Document.createElement(XMLLabel::tagWidth);
-    widthElement.appendChild(widthText);
-    recordElement.appendChild(widthElement);
+    auto widthStr = QString::number(roi->width());
+    auto widthTag = createTextTag(XMLLabel::tagWidth, widthStr);
+    recordElement.appendChild(widthTag);
 
     // height
-    auto height = roi->height();
-    auto heightText = m_Document.createTextNode(QString::number(height));
-    auto heightElement = m_Document.createElement(XMLLabel::tagHeight);
-    heightElement.appendChild(heightText);
-    recordElement.appendChild(heightElement);
+    auto heightStr = QString::number(roi->height());
+    auto heightTag = createTextTag(XMLLabel::tagHeight, heightStr);
+    recordElement.appendChild(heightTag);
 
     // add record to frame element
     newFrame.appendChild(recordElement);
   }
 
+  auto dataSet = m_Document.firstChildElement(XMLLabel::tagRoot).firstChildElement(XMLLabel::tagDataSet);
+
   // check the document has the same frame or not
   if (hasFrame(iFrameNum)) {
     // the document has the old one
     // find it and replace by new one
-    auto dataSet = m_Document.firstChildElement(XMLLabel::tagRoot).firstChildElement(XMLLabel::tagDataSet);
     auto frameList = dataSet.elementsByTagName(XMLLabel::tagFrame);
     for (int i = 0; i < frameList.length(); ++i) {
-      auto& frame = frameList.item(i).toElement();
+      auto frame = frameList.item(i).toElement();
       if (frame.attribute(XMLLabel::attrNum).toInt() == iFrameNum) {
         dataSet.replaceChild(newFrame, frame);
         break;
@@ -229,9 +229,16 @@ void ResultManager::addROIs(int iFrameNum, const QList<QSharedPointer<const ROIB
   } else {
     // the document dosn't have the frame
     // append it and add number to set
-    auto dataSet = m_Document.documentElement().firstChildElement(XMLLabel::tagDataSet);
     dataSet.appendChild(newFrame);
     m_Frames.insert(iFrameNum);
+
+    // check the end number of information
+    if (m_Info.iEndNum < iFrameNum) {
+      m_Info.iEndNum = iFrameNum;
+      auto endNumTag = createTextTag(XMLLabel::tagEndNum, QString::number(iFrameNum));
+      modifyInfoTag(endNumTag);
+    }
+
   }
 }
 
@@ -299,6 +306,15 @@ QList<QSharedPointer<ROIBase>> ResultManager::getROIs(int iFrameNum) const
   }
 
   return ROIs;
+}
+
+void ResultManager::reset()
+{
+  m_Document = QDomDocument();
+  m_sDefaultPath.clear();
+  m_sFilePath.clear();
+  m_Frames.clear();
+  m_bTempFileSaved = false;
 }
 
 QDomElement ResultManager::createTextTag(const QString& tagName, const QString& text)
@@ -385,9 +401,8 @@ void ResultManager::create(void)
   infoTag.appendChild(typeTag);
 
   // set create date tag
-  QDomText createDateText = m_Document.createTextNode(QDate::currentDate().toString("yyyy/MM/dd"));
-  QDomElement createDateTag = m_Document.createElement(XMLLabel::tagCreationDate);
-  createDateTag.appendChild(createDateText);
+  QString sDate = QDate::currentDate().toString("yyyy/MM/dd");
+  QDomElement createDateTag = createTextTag(XMLLabel::tagCreationDate, sDate);
   infoTag.appendChild(createDateTag);
 
   // add information tag
